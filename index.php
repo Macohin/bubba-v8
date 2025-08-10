@@ -94,6 +94,8 @@
         let pollingIntervalId = null;
         let lastKnownTimestamp = 0;
         let currentCpf = null; // Store CPF for polling status files
+        let isDisplayingFrases = false;
+        const fraseQueue = [];
 
         function appendLogMessage(message, isError = false) {
             if (!htmlResultContent) { console.error("DOM: htmlResultContent not found for log."); return; }
@@ -172,6 +174,19 @@
             }
         }
 
+        async function displayFrasesWithDelay() {
+            if (isDisplayingFrases) return;
+            isDisplayingFrases = true;
+
+            while (fraseQueue.length > 0) {
+                const frase = fraseQueue.shift();
+                appendLogMessage(frase);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+
+            isDisplayingFrases = false;
+        }
+
         function fetchAndUpdateStatus() {
             let url = 'get_latest_status.php?r=' + Date.now();
             if (currentCpf) url += '&cpf=' + encodeURIComponent(currentCpf);
@@ -200,7 +215,8 @@
                     if (data.video) changeVideoSourceUI(adaptVideoPathForDevice(data.video));
 
                     if (data.status === 'frases_received' && Array.isArray(data.frases)) {
-                        data.frases.forEach(frase => appendLogMessage(frase));
+                        fraseQueue.push(...data.frases);
+                        displayFrasesWithDelay();
                     }
 
                     if (data.status === 'result_ready') {
