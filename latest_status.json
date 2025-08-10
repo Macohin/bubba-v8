@@ -1,0 +1,8 @@
+{
+    "status": "files_received_by_n8n",
+    "message": "={{$json.mensagemFormatada}}",
+    "video": "BackgroundVideos/desk_processing_01_desktop.mp4",
+    "progress": 20,
+    "timestamp": "={{$now.timestamp}}",
+    "last_updated": "2025-07-06 23:05:36"
+}
