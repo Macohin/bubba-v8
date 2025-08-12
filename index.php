@@ -350,16 +350,7 @@
 
             <div id="resultsArea" class="hidden space-y-6">
                 <div id="htmlResultContent" class="prose-invert"></div>
-                <div id="exportButtonsContainer" class="hidden">
-                    <button id="exportPdfBtn" class="btn primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" style="display: inline-block; width: 1.25rem; height: 1.25rem; margin-right: .5rem; margin-top: -0.25rem;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A1 1 0 0111.293 2.707L14.586 6H16a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8H4a2 2 0 01-2-2V4zm2 0v4h5.586L8.293 4.707A1 1 0 007.586 4H6zm5 4h2.586L11 5.414V8zM8 10a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1zm1 3a1 1 0 100 2h2a1 1 0 100-2H9z" clip-rule="evenodd" /></svg>
-                        Exportar para PDF
-                    </button>
-                    <button id="exportDocxBtn" class="btn alt">
-                        <svg xmlns="http://www.w3.org/2000/svg" style="display: inline-block; width: 1.25rem; height: 1.25rem; margin-right: .5rem; margin-top: -0.25rem;" viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" /><path stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v4m0 0l-2-2m2 2l2-2" /></svg>
-                        Exportar para DOCX
-                    </button>
-                </div>
+                <!-- Export buttons removed as per user request -->
             </div>
             <button id="simulateCallbackBtn" class="hidden" style="margin-top: 1rem; padding: .5rem; background-color: #7c3aed; color: white; border-radius: .5rem; font-size: .75rem;">Simular Resultado Final (Teste)</button>
         </div>
