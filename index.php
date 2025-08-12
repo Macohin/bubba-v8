@@ -414,6 +414,8 @@
         let currentCpf = null; // Store CPF for polling status files
         let isDisplayingFrases = false;
         const fraseQueue = [];
+        let initialMessagesLooping = false;
+        let initialMessageTimeout;
 
         function appendLogMessage(message, isError = false) {
             if (!htmlResultContent) { console.error("DOM: htmlResultContent not found for log."); return; }
@@ -555,6 +557,14 @@
                     if (!data) { console.warn('Polling: No data from get_latest_status.php.'); return; }
                     console.log('Polling: Status Received:', JSON.stringify(data));
 
+                    const hasRealContent = data.message || (data.status === 'frases_received' && data.frases.length > 0) || data.status === 'result_ready' || data.status === 'error';
+
+                    if (initialMessagesLooping && hasRealContent) {
+                        initialMessagesLooping = false;
+                        clearTimeout(initialMessageTimeout);
+                        htmlResultContent.innerHTML = ''; // Clear initial messages
+                    }
+
                     const newTimestamp = Number(data.timestamp);
                     if (isNaN(newTimestamp)) {
                         console.warn('Polling: Invalid timestamp received:', data.timestamp);
@@ -630,7 +640,7 @@
         }
 
         if(startAnalysisBtn) {
-            startAnalysisBtn.addEventListener('click', async function() { // Make function async
+            startAnalysisBtn.addEventListener('click', function() {
                 if(!cpfInput || !cpfError) { console.error("DOM: CPF elements not found."); alert("Erro na página (CPF)."); return;}
                 if(!dropzoneFileInput) { console.error("DOM: dropzoneFileInput not found."); alert("Erro na página."); return; }
                 if(!appArea) { console.error("DOM: appArea not found."); alert("Erro na página."); return; }
@@ -666,7 +676,6 @@
                 appArea.classList.add('hidden');
                 resultsArea.classList.remove('hidden');
                 if(exportButtonsContainer) exportButtonsContainer.classList.add('hidden');
-
                 htmlResultContent.innerHTML = '';
 
                 const initialMessages = [
@@ -708,10 +717,20 @@
                     "⇅ Aguardando retorno do servidor Macohin AI"
                 ];
 
-                for (const msg of initialMessages) {
-                    appendLogMessage(msg);
-                    await new Promise(resolve => setTimeout(resolve, 3000)); // 3000ms delay
+                let messageIndex = 0;
+                initialMessagesLooping = true;
+
+                function displayNextInitialMessage() {
+                    if (!initialMessagesLooping || messageIndex >= initialMessages.length) {
+                        initialMessagesLooping = false;
+                        return;
+                    }
+                    appendLogMessage(initialMessages[messageIndex]);
+                    messageIndex++;
+                    initialMessageTimeout = setTimeout(displayNextInitialMessage, 2000); // New 2000ms delay
                 }
+
+                displayNextInitialMessage(); // Start the loop
 
                 setVideoOverlayOpacity(0.2);
 
@@ -728,12 +747,16 @@
                         if(dropzoneFileInput) dropzoneFileInput.value = '';
                         startPollingStatus();
                     } else {
+                        initialMessagesLooping = false; // Stop loop on failure
+                        clearTimeout(initialMessageTimeout);
                         appendLogMessage(`Falha ao enviar arquivos: ${data.message || 'Erro desconhecido.'}`, true);
                         appArea.classList.remove('hidden');
                         resultsArea.classList.add('hidden');
                     }
                 })
                 .catch((error) => {
+                    initialMessagesLooping = false; // Stop loop on error
+                    clearTimeout(initialMessageTimeout);
                     console.error('Upload Fetch Error:', error);
                     appendLogMessage(`Erro crítico no envio: ${error.message || 'Não foi possível contactar o servidor.'}`, true);
                     appArea.classList.remove('hidden');
