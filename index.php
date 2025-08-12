@@ -106,7 +106,7 @@
   /* card “purpose” centralizado */
   .section{width:100%; display:grid; place-items:center; margin-top: clamp(18px, 4vh, 32px);}
   .card{
-    width:min(900px, 95%); background:linear-gradient(180deg,var(--card),var(--card2));
+    width:min(900px, 95%); background:linear-gradient(180deg, rgba(32, 16, 65, 0.85), rgba(37, 17, 77, 0.85));
     border:2px dotted rgba(255,255,255,.15); border-radius:18px;
     box-shadow:0 12px 60px rgba(0,0,0,.35), var(--shadow); overflow:hidden;
   }
@@ -273,6 +273,9 @@
   .prose-invert {
       color: var(--txt);
   }
+  #htmlResultContent, #htmlResultContent * {
+    font-family: var(--mono) !important;
+  }
 </style>
 </head>
 <body>
@@ -311,7 +314,7 @@
                     <p id="cpfError" class="hidden"></p>
                 </div>
 
-                <p id="uploadPromptText">Envie seus documentos para análise:</p>
+                <p id="uploadPromptText">Para iniciar a análise previdenciária, envie seus documentos — é essencial anexar, no mínimo, o CNIS e a CTPS.</p>
                 <div id="dropzoneContainer">
                     <label for="dropzone-file">
                         <div id="dropzoneInstructions">
