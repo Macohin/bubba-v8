@@ -281,28 +281,7 @@
   <div class="grid" aria-hidden="true"></div>
 
   <header>
-    <div class="brand" aria-label="MACOHIN AI">
-      <div class="mark" aria-hidden="true">
-        <!-- M-circuit icon -->
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M4 18V6m0 0h2m14 0v12m0 0h-2M8 6v8l4-4 4 4V6"
-                stroke="#0b1b34" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="4" cy="6" r="1.9" fill="#0b1b34"/>
-          <circle cx="20" cy="18" r="1.9" fill="#0b1b34"/>
-          <circle cx="12" cy="10" r="1.9" fill="#0b1b34"/>
-        </svg>
-      </div>
-      <div>
-        <div class="name">MACOHIN AI</div>
-        <div class="sub">Asynchronous AI Agents</div>
-      </div>
-    </div>
-
-    <div class="badges">
-      <div class="badge primary">v0.1 • async</div>
-      <div class="badge alt">API-first</div>
-      <div class="badge ghost">compliance ✓</div>
-    </div>
+    <!-- Content removed as per user request -->
   </header>
 
   <div class="container">
@@ -322,7 +301,7 @@
       <article class="card" aria-label="Our purpose">
         <div class="chrome">
           <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
-          <span>purpose.txt • /about</span>
+          <span>retirement.calc • /bubba-ai</span>
         </div>
         <div class="card-body">
             <div id="appArea" class="space-y-6">
@@ -375,26 +354,27 @@
 
     <section class="examples" id="use-cases" aria-label="Use cases">
       <div class="ex">
-        <h4>&gt; Contract in Minutes</h4>
-        <p>Provide parties and key clauses. The agent drafts, reviews, and ships with an executive summary.</p>
-        <div class="meta">Output: DOCX + PDF • Change log</div>
+        <h4>&gt; Conferência Inteligente</h4>
+        <p>Anexe seus documentos previdenciários; o Bubba AI executa data cross-check, varre CNIS × CTPS, identifica lacunas e sinaliza inconsistências para correção.</p>
+        <div class="meta">Output: 📄 DOCX • 📋 Compliance checklist com trilha de auditoria</div>
       </div>
       <div class="ex">
-        <h4>&gt; Petition with Checks</h4>
-        <p>Upload facts and exhibits; the agent assembles the filing and highlights inconsistencies.</p>
-        <div class="meta">Output: DOCX • Compliance checklist</div>
+        <h4>&gt; Relatório Automatizado</h4>
+        <p>Dados de planilhas ou APIs; o Bubba AI compila, processa e renderiza gráficos e simulações com algorithmic precision, mantendo hash log de cada etapa.</p>
+        <div class="meta">Output: 📄 PDF • 🔍 JSON técnico via API com assinatura digital</div>
       </div>
       <div class="ex">
-        <h4>&gt; Automated Report</h4>
-        <p>Spreadsheet/API in, structured report out—charts, conclusions, and an audit trail.</p>
-        <div class="meta">Output: PDF • Technical JSON via API</div>
+        <h4>&gt; Simulação e Cenários</h4>
+        <p>O Bubba AI calcula tempo de contribuição, carência e RMI, executa multi-rule engine com regras pré e pós-EC 103/2019, e retorna o cenário previdenciário mais vantajoso.</p>
+        <div class="meta">Output: 📄 PDF • 📊 Comparativo de cenários com métricas avançadas</div>
       </div>
     </section>
   </div>
 
   <footer>
     MACOHIN AI • Asynchronous AI Agents<br/>
-    <span style="opacity:.8">Florida Limited Liability Company — MACOHIN LLC — 2651 NE 23rd St — Pompano Beach, FL 33062</span>
+    Florida Limited Liability Company<br/>
+    bubba.macohin.ai
   </footer>
 
   <script>
