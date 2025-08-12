@@ -557,12 +557,16 @@
                     if (!data) { console.warn('Polling: No data from get_latest_status.php.'); return; }
                     console.log('Polling: Status Received:', JSON.stringify(data));
 
-                    const hasRealContent = data.message || (data.status === 'frases_received' && data.frases.length > 0) || data.status === 'result_ready' || data.status === 'error';
+                    const isRealLogStarting = (data.status === 'frases_received' && data.frases.length > 0) || data.status === 'result_ready' || data.status === 'error';
 
-                    if (initialMessagesLooping && hasRealContent) {
-                        initialMessagesLooping = false;
-                        clearTimeout(initialMessageTimeout);
-                        htmlResultContent.innerHTML = ''; // Clear initial messages
+                    if (initialMessagesLooping) {
+                        if (isRealLogStarting) {
+                            initialMessagesLooping = false;
+                            clearTimeout(initialMessageTimeout);
+                            htmlResultContent.innerHTML = '';
+                        } else {
+                            return; // Ignore intermediate status updates
+                        }
                     }
 
                     const newTimestamp = Number(data.timestamp);
