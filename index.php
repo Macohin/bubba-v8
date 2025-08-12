@@ -276,6 +276,17 @@
   #htmlResultContent, #htmlResultContent * {
     font-family: var(--mono) !important;
   }
+
+  .log-line {
+    margin-bottom: 0.25rem;
+    white-space: pre-wrap;
+  }
+  .log-start { color: var(--c1); }
+  .log-success { color: var(--c1); }
+  .log-action { color: var(--c2); }
+  .log-warning { color: #ffbd2e; }
+  .log-error { color: #ff5f56; }
+  .log-info { color: var(--c3); }
 </style>
 </head>
 <body>
@@ -408,13 +419,48 @@
             if (!htmlResultContent) { console.error("DOM: htmlResultContent not found for log."); return; }
             if (message) {
                 const logEntry = document.createElement('p');
-                logEntry.className = isError ? 'text-red-400 mb-2' : 'text-sky-300 mb-2 log-entry-new';
+                logEntry.className = 'log-line'; // Base class
+
+                let logClass = '';
+                const trimmedMessage = message.trim();
+                const firstChar = trimmedMessage.charAt(0);
+                // Unicode property escapes for emoji detection
+                const startsWithEmoji = /^\p{Emoji}/u.test(trimmedMessage);
+
+                if (isError) {
+                    logClass = 'log-error';
+                } else {
+                    switch (firstChar) {
+                        case '»':
+                            logClass = 'log-start';
+                            break;
+                        case '✓':
+                            logClass = 'log-success';
+                            break;
+                        case '⇅':
+                            logClass = 'log-action';
+                            break;
+                        case '!':
+                            logClass = 'log-warning';
+                            break;
+                        case 'ℹ':
+                            logClass = 'log-info';
+                            break;
+                        default:
+                            if (startsWithEmoji) {
+                                logClass = 'log-action'; // Default color for other emojis
+                            }
+                            break;
+                    }
+                }
+
+                if (logClass) {
+                    logEntry.classList.add(logClass);
+                }
+
                 logEntry.textContent = message;
                 htmlResultContent.appendChild(logEntry);
                 if (resultsArea) resultsArea.scrollTop = resultsArea.scrollHeight;
-                if (!isError) {
-                    setTimeout(() => logEntry.classList.remove('log-entry-new'), 1500);
-                }
             }
         }
 
@@ -584,7 +630,7 @@
         }
 
         if(startAnalysisBtn) {
-            startAnalysisBtn.addEventListener('click', function() {
+            startAnalysisBtn.addEventListener('click', async function() { // Make function async
                 if(!cpfInput || !cpfError) { console.error("DOM: CPF elements not found."); alert("Erro na página (CPF)."); return;}
                 if(!dropzoneFileInput) { console.error("DOM: dropzoneFileInput not found."); alert("Erro na página."); return; }
                 if(!appArea) { console.error("DOM: appArea not found."); alert("Erro na página."); return; }
@@ -622,7 +668,40 @@
                 if(exportButtonsContainer) exportButtonsContainer.classList.add('hidden');
 
                 htmlResultContent.innerHTML = '';
-                appendLogMessage('Enviando arquivos e iniciando análise...');
+
+                const initialMessages = [
+                    "🐾 Inicializando pipeline Bubba AI… preparando pré-processamento de documentos.",
+                    "⌛ Tempo de processamento previsto ≈ 5–10 minutos • standby…",
+                    "⚙️ Verificando lote recebido… validando formatos e metadados.",
+                    "📂 Detectando PDFs e imagens… organizando ordem lógica dos arquivos.",
+                    "🖨️ Fracionando documentos em páginas… mapeando sequência de processamento.",
+                    "🖼️ Renderizando páginas do PDF… resolução otimizada para OCR.",
+                    "🎯 Correção de orientação/deskew… ajustando nitidez e contraste.",
+                    "🧼 Removendo ruído visual… preparando camadas para reconhecimento de texto.",
+                    "🖼️ Convertendo páginas para JPG… padronizando qualidade e dimensões.",
+                    "🗜️ Otimização sem perda (JPG)… compactação inteligente aplicada.",
+                    "🗃️ Indexando imagens geradas… estrutura pronta para encapsulamento.",
+                    "🔑 Gerando upload_id (UUID v4)… sessão de processamento aberta.",
+                    "🧾 Anexando CPF e identificadores… parâmetros de envio preparados.",
+                    "📦 Compactando pacote final (ZIP64)… agrupando todos os JPGs.",
+                    "🧮 Calculando checksum (SHA-256)… integridade do arquivo garantida.",
+                    "🔐 Assinando requisição (HMAC)… preparando cabeçalhos seguros.",
+                    "🌐 Montando multipart/form-data… incluindo arquivo_zip, upload_id, cpf.",
+                    "🚀 POST → Webhook Bubba AI - Core Macohin AI Server Intranet… transmitindo pacote ao orquestrador.",
+                    "📡 Handshake confirmado (202 Accepted)… callback registrado com sucesso.",
+                    "⏳ Aguardando autorização do fluxo… n8n ativando estágio de OCR.",
+                    "🧠 Transcrição acionada no servidor Macohin AI… aguardando lote de mensagens do callback.",
+                    "🛰️ Canal de status online… pronto para receber frases_matrix.",
+                    "💤 Aguardando início do processamento… monitorando status_files/….",
+                    "📥 Quando o callback chegar… exibiremos as mensagens linha a linha.",
+                    "✅ Pronto para continuidade… log em tempo real será iniciado automaticamente."
+                ];
+
+                for (const msg of initialMessages) {
+                    appendLogMessage(msg);
+                    await new Promise(resolve => setTimeout(resolve, 150)); // 150ms delay
+                }
+
                 setVideoOverlayOpacity(0.2);
 
                 const formData = new FormData();
@@ -634,7 +713,7 @@
                 .then(data => {
                     console.log('Upload Response:', data);
                     if(data.success){
-                        appendLogMessage(data.message || 'Arquivos enviados. Aguardando processamento...');
+                        // The old message "Arquivos enviados..." is no longer needed as we have the detailed log.
                         if(dropzoneFileInput) dropzoneFileInput.value = '';
                         startPollingStatus();
                     } else {
