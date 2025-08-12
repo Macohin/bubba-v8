@@ -34,7 +34,7 @@
     --c3: var(--accent-string);
 
     --grid: rgba(155, 132, 212, .1);
-    --card: rgba(26, 0, 51, 0.7);
+    --card: rgba(26, 0, 51, 0.6);
     --card2: rgba(30, 0, 60, 0.7);
     --mono: 'Fira Code', monospace;
     --logo-font: 'VT323', monospace;
@@ -87,13 +87,13 @@
 
   .ascii{
     white-space:pre; user-select:none; margin:0 auto; max-width:100%;
-    line-height:1.0; letter-spacing:0;
-    font-family: var(--logo-font);
-    font-size: clamp(12px, 2.2vw, 20px);
+    line-height:1.02; letter-spacing:0;
+    font-size: clamp(10px, 2vw, 18px);
     color: transparent;
-    background-image: linear-gradient(135deg, var(--accent-func), var(--accent-keyword));
+    background-image: radial-gradient(120% 120% at 50% 20%, #c7e6ff, #ffffff 45%, #dff7ff 70%);
     -webkit-background-clip: text; background-clip: text;
-    filter: drop-shadow(0 0 5px var(--accent-func)) drop-shadow(0 0 12px var(--accent-keyword));
+    text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    filter: drop-shadow(0 0 6px #a3d4ff) drop-shadow(0 0 14px #78ffe6);
   }
   .tagline{
     margin-top:10px; font-size:clamp(12px,1.2vw,14px); letter-spacing:1px;
@@ -107,7 +107,7 @@
     background: var(--card);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border:1px solid var(--accent-keyword);
+    border:1px solid var(--accent-func);
     border-radius:18px;
     box-shadow:0 12px 60px rgba(0,0,0,.55), var(--shadow);
     overflow:hidden;
@@ -234,12 +234,12 @@
   <div class="container">
     <section class="hero">
 <pre class="ascii" aria-hidden="true">
-███╗   ███╗ █████╗  ██████╗ ██████╗ ██╗  ██╗██╗███╗   ██╗
-████╗ ████║██╔══██╗██╔════╝██╔═══██╗██║  ██║██║████╗  ██║
-██╔████╔██║███████║██║     ██║   ██║███████║██║██╔██╗ ██║
-██║╚██╔╝██║██╔══██║██║     ██║   ██║██╔══██║██║██║╚██╗██║
-██║ ╚═╝ ██║██║  ██║╚██████╗╚██████╔╝██║  ██║██║██║ ╚████║
-╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝
+███╗   ███╗ █████╗  ██████╗ ██████╗ ██╗  ██╗██╗███╗   ██╗     █████╗ ██╗
+████╗ ████║██╔══██╗██╔════╝██╔═══██╗██║  ██║██║████╗  ██║    ██╔══██╗██║
+██╔████╔██║███████║██║     ██║   ██║███████║██║██╔██╗ ██║    ███████║██║
+██║╚██╔╝██║██╔══██║██║     ██║   ██║██╔══██║██║██║╚██╗██║    ██╔══██║██║
+██║ ╚═╝ ██║██║  ██║╚██████╗╚██████╔╝██║  ██║██║██║ ╚████║    ██║  ██║██║
+╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝  ╚═╝╚═╝
 </pre>
       <div class="tagline">// Asynchronous AI Multi-Agents — Automated Legal Analysis</div>
     </section>
