@@ -38,7 +38,7 @@
     --card2: rgba(30, 0, 60, 0.7);
     --mono: 'Fira Code', monospace;
     --logo-font: 'VT323', monospace;
-    --shadow: 0 0 12px var(--accent-func), 0 0 24px var(--accent-keyword);
+    --shadow: 0 0 18px rgba(88,166,255,.28), 0 0 36px rgba(55,227,195,.18);
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -103,19 +103,13 @@
 
   .section{width:100%; display:grid; place-items:center; margin-top: clamp(18px, 4vh, 32px);}
   .card{
-    width:min(900px, 95%);
-    background: var(--card);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border:1px solid var(--accent-func);
-    border-radius:18px;
-    box-shadow:0 12px 60px rgba(0,0,0,.55), var(--shadow);
-    overflow:hidden;
+    width:min(900px, 95%); background:linear-gradient(180deg, rgba(32, 16, 65, 0.85), rgba(37, 17, 77, 0.85));
+    border:2px dotted rgba(255,255,255,.15); border-radius:18px;
+    box-shadow:0 12px 60px rgba(0,0,0,.35), var(--shadow); overflow:hidden;
   }
   .chrome{display:flex; align-items:center; gap:8px; padding:10px 12px;
-    border-bottom:1px solid var(--accent-keyword);
-    background:linear-gradient(0deg, rgba(255,255,255,.05), transparent);
-    font-size:12px; color:var(--muted)}
+    border-bottom:1px dashed rgba(255,255,255,.12);
+    background:linear-gradient(0deg,#ffffff10,#0000); font-size:12px; color:var(--muted)}
   .dot{width:10px;height:10px;border-radius:50%}
   .d1{background:#ff5f56}.d2{background:#ffbd2e}.d3{background:#27c93f}
 
@@ -161,14 +155,21 @@
 
   .card-body #uploadPromptText { text-align: center; font-size: 1.125rem; margin-bottom: 1rem; }
   .card-body #dropzoneContainer label {
-    border: 2px dashed var(--muted);
-    background: rgba(155, 132, 212, .1);
-    border-radius: 12px; transition: background .2s, border-color .2s;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    width: 100%; height: 15rem; cursor: pointer;
+    border: 2px dashed rgba(255,255,255,.15);
+    background: rgba(255,255,255,.05);
+    border-radius: 12px;
+    transition: background .2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 15rem;
+    cursor: pointer;
   }
   .card-body #dropzoneContainer label:hover {
-    background: rgba(155, 132, 212, .2); border-color: var(--c1);
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.3);
   }
   .card-body #dropzoneContainer svg { color: var(--muted); width: 2rem; height: 2rem; margin-bottom: 1rem; }
   .card-body #dropzoneContainer p { color: var(--muted); font-size: .875rem; }
@@ -182,23 +183,12 @@
     content: '✓'; color: var(--accent-green); position: absolute; left: 0;
   }
 
-  #startAnalysisBtn {
-    text-decoration:none; font-weight:800; letter-spacing:.3px; padding:12px 16px;
-    border-radius:10px; display:inline-block; width: 100%; text-align:center;
-    color: var(--bg-main);
-    background: var(--accent-func);
-    border: 1px solid var(--accent-func);
-    transition: all .2s;
-    box-shadow: 0 0 10px var(--accent-func);
-  }
-  #startAnalysisBtn:hover {
-    background: var(--accent-keyword);
-    border-color: var(--accent-keyword);
-    box-shadow: 0 0 15px var(--accent-keyword);
-  }
+  .btn{ text-decoration:none; font-weight:800; letter-spacing:.3px; padding:10px 14px;
+    border-radius:10px; border:1px solid rgba(255,255,255,.15); display:inline-block}
+  .btn.primary{color:#091017; background:linear-gradient(180deg,#9dffce,#37e3c3)}
 
   #resultsArea {
-    border-top: 1px dashed var(--accent-keyword);
+    border-top: 1px dashed rgba(255,255,255,.16);
     padding-top: 18px; margin-top: 18px;
   }
   #htmlResultContent {
