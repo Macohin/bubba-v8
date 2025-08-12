@@ -31,6 +31,20 @@
     overflow-x:hidden; display:flex; flex-direction:column; min-height:100svh;
   }
 
+  #background-video {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translateX(-50%) translateY(-50%);
+    z-index: -2;
+    opacity: 0.2;
+    object-fit: cover;
+  }
+
   /* matrix + grid (sutil) */
   #rain{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.12}
   .grid{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.26;
@@ -262,6 +276,7 @@
 </style>
 </head>
 <body>
+  <video id="background-video" autoplay loop muted playsinline src="https://bubba.macohin.ai/bg/bg.mp4"></video>
   <canvas id="rain" aria-hidden="true"></canvas>
   <div class="grid" aria-hidden="true"></div>
 
