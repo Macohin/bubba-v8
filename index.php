@@ -598,41 +598,40 @@
 
                 const initialMessages = [
                     "» Inicia sequência de pré-processamento de documentos recebidos 🐾💾",
-                    "⇅ Lê metadados do lote de arquivos enviados pelo usuário",
-                    "✓ Confirma formatos aceitos: PDF, JPG, PNG, DOCX",
-                    "⇅ Cria diretório temporário para sessão atual",
-                    "✓ Gera upload_id único para rastreamento da análise",
-                    "⇅ Lista arquivos recebidos e ordena por nome e tipo",
-                    "✓ Valida integridade de cada arquivo (checksum SHA-256)",
+                    "⇅ Lê metadados do lote enviado pelo usuário",
+                    "✓ Formatos validados: PDF, JPG, PNG, DOCX",
+                    "⇅ Cria diretório temporário para sessão",
+                    "✓ Gera identificador único para rastrear análise",
+                    "⇅ Lista arquivos recebidos e ordena por nome/tipo",
+                    "✓ Integridade confirmada (checksum SHA-256)",
                     "⇅ Abre primeiro documento para inspeção",
-                    "✓ Identifica número total de páginas a processar",
-                    "⇅ Converte página 1 para imagem JPG otimizada",
-                    "✓ Aplica filtro de nitidez para OCR de alta precisão",
-                    "⇅ Converte páginas restantes para JPG sequencialmente",
-                    "✓ Ajusta resolução e proporção das imagens geradas",
-                    "⇅ Remove margens e áreas em branco das páginas",
-                    "✓ Garante padronização de tamanho (A4 virtual)",
-                    "⇅ Aplica correção de rotação (deskew) automática",
-                    "✓ Salva imagens processadas no diretório temporário",
-                    "⇅ Repete procedimento para todos os documentos recebidos",
-                    "✓ Cria índice interno de imagens geradas para o lote",
-                    "⇅ Agrupa imagens em sequência lógica de leitura",
-                    "✓ Compacta todas as imagens no formato ZIP64",
-                    "⇅ Verifica integridade do arquivo ZIP antes do envio",
-                    "✓ Anexa CPF e identificadores ao pacote de dados",
+                    "⇅ Converte página 1 para JPG otimizado",
+                    "✓ Aplica filtro de nitidez para OCR preciso",
+                    "⇅ Converte demais páginas para JPG sequencialmente",
+                    "✓ Ajusta resolução e mantém proporção A4 virtual",
+                    "⇅ Remove margens e espaços em branco",
+                    "✓ Padroniza dimensões para processamento uniforme",
+                    "⇅ Aplica deskew (correção de rotação) automática",
+                    "✓ Salva imagens tratadas no diretório temporário",
+                    "⇅ Repete processo para todos os documentos recebidos",
+                    "✓ Gera índice interno das imagens processadas",
+                    "⇅ Agrupa imagens na sequência correta de leitura",
+                    "✓ Compacta em pacote ZIP64",
+                    "⇅ Valida integridade do ZIP antes do envio",
+                    "✓ Anexa CPF e metadados ao pacote",
                     "⇅ Prepara cabeçalhos HTTP com autenticação HMAC",
-                    "✓ Monta requisição multipart/form-data com arquivo ZIP",
-                    "⇅ Transmitindo pacote criptografado para o servidor Macohin — Florida, USA 🌎",
+                    "✓ Monta requisição multipart/form-data",
+                    "⇅ Transmitindo pacote criptografado ao servidor Macohin — Flórida, USA 🌎",
                     "✓ Conexão segura estabelecida com a rede neural Bubba AI",
-                    "⇅ Inicia transmissão segura para webhook do n8n 🚀",
-                    "✓ Aguarda confirmação de recebimento (HTTP 202)",
-                    "⇅ Registra no log local: “Pacote enviado ao orquestrador”",
-                    "✓ Mantém canal de callback aguardando mensagens",
-                    "⇅ Calcula tempo estimado de execução com base no tamanho do lote",
-                    "✓ Tempo estimado de processamento: entre 5 e 10 minutos ⏱",
-                    "⇅ Após a conclusão, abrirá automaticamente uma janela com o Planejamento Previdenciário editável",
-                    "✓ O sistema permitirá conferência completa em plataforma editável",
-                    "⇅ Aguardando retorno do servidor Macohin AI"
+                    "⇅ Inicia envio para webhook do Bubba AI n8n🚀",
+                    "✓ Recebimento confirmado (HTTP 202)",
+                    "⇅ Registra no log: “Pacote enviado ao orquestrador”",
+                    "✓ Canal de callback pronto para mensagens",
+                    "⇅ Calcula tempo estimado de execução [base: tamanho do lote]",
+                    "ℹ Tempo estimado: entre 5 e 10 minutos ⏱",
+                    "⇅ Após concluir, abrirá janela do Planejamento Previdenciário editável",
+                    "✓ Plataforma permitirá conferência e ajustes em tempo real",
+                    "⇅ Aguardando retorno do servidor Bubba AI..."
                 ];
 
                 let messageIndex = 0;
@@ -648,8 +647,6 @@
                     initialMessageTimeout = setTimeout(displayNextInitialMessage, 2000); // New 2000ms delay
                 }
 
-                displayNextInitialMessage(); // Start the loop
-
                 setVideoOverlayOpacity(0.2);
 
                 const formData = new FormData();
@@ -661,12 +658,11 @@
                 .then(data => {
                     console.log('Upload Response:', data);
                     if(data.success){
-                        // The old message "Arquivos enviados..." is no longer needed as we have the detailed log.
                         if(dropzoneFileInput) dropzoneFileInput.value = '';
+                        // Start the fake logs and the real polling concurrently
+                        displayNextInitialMessage();
                         startPollingStatus();
                     } else {
-                        initialMessagesLooping = false; // Stop loop on failure
-                        clearTimeout(initialMessageTimeout);
                         appendLogMessage(`Falha ao enviar arquivos: ${data.message || 'Erro desconhecido.'}`, true);
                         appArea.classList.remove('hidden');
                         resultsArea.classList.add('hidden');
