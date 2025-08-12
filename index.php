@@ -670,36 +670,47 @@
                 htmlResultContent.innerHTML = '';
 
                 const initialMessages = [
-                    "🐾 Inicializando pipeline Bubba AI… preparando pré-processamento de documentos.",
-                    "⌛ Tempo de processamento previsto ≈ 5–10 minutos • standby…",
-                    "⚙️ Verificando lote recebido… validando formatos e metadados.",
-                    "📂 Detectando PDFs e imagens… organizando ordem lógica dos arquivos.",
-                    "🖨️ Fracionando documentos em páginas… mapeando sequência de processamento.",
-                    "🖼️ Renderizando páginas do PDF… resolução otimizada para OCR.",
-                    "🎯 Correção de orientação/deskew… ajustando nitidez e contraste.",
-                    "🧼 Removendo ruído visual… preparando camadas para reconhecimento de texto.",
-                    "🖼️ Convertendo páginas para JPG… padronizando qualidade e dimensões.",
-                    "🗜️ Otimização sem perda (JPG)… compactação inteligente aplicada.",
-                    "🗃️ Indexando imagens geradas… estrutura pronta para encapsulamento.",
-                    "🔑 Gerando upload_id (UUID v4)… sessão de processamento aberta.",
-                    "🧾 Anexando CPF e identificadores… parâmetros de envio preparados.",
-                    "📦 Compactando pacote final (ZIP64)… agrupando todos os JPGs.",
-                    "🧮 Calculando checksum (SHA-256)… integridade do arquivo garantida.",
-                    "🔐 Assinando requisição (HMAC)… preparando cabeçalhos seguros.",
-                    "🌐 Montando multipart/form-data… incluindo arquivo_zip, upload_id, cpf.",
-                    "🚀 POST → Webhook Bubba AI - Core Macohin AI Server Intranet… transmitindo pacote ao orquestrador.",
-                    "📡 Handshake confirmado (202 Accepted)… callback registrado com sucesso.",
-                    "⏳ Aguardando autorização do fluxo… n8n ativando estágio de OCR.",
-                    "🧠 Transcrição acionada no servidor Macohin AI… aguardando lote de mensagens do callback.",
-                    "🛰️ Canal de status online… pronto para receber frases_matrix.",
-                    "💤 Aguardando início do processamento… monitorando status_files/….",
-                    "📥 Quando o callback chegar… exibiremos as mensagens linha a linha.",
-                    "✅ Pronto para continuidade… log em tempo real será iniciado automaticamente."
+                    "» Inicia sequência de pré-processamento de documentos recebidos 🐾💾",
+                    "⇅ Lê metadados do lote de arquivos enviados pelo usuário",
+                    "✓ Confirma formatos aceitos: PDF, JPG, PNG, DOCX",
+                    "⇅ Cria diretório temporário para sessão atual",
+                    "✓ Gera upload_id único para rastreamento da análise",
+                    "⇅ Lista arquivos recebidos e ordena por nome e tipo",
+                    "✓ Valida integridade de cada arquivo (checksum SHA-256)",
+                    "⇅ Abre primeiro documento para inspeção",
+                    "✓ Identifica número total de páginas a processar",
+                    "⇅ Converte página 1 para imagem JPG otimizada",
+                    "✓ Aplica filtro de nitidez para OCR de alta precisão",
+                    "⇅ Converte páginas restantes para JPG sequencialmente",
+                    "✓ Ajusta resolução e proporção das imagens geradas",
+                    "⇅ Remove margens e áreas em branco das páginas",
+                    "✓ Garante padronização de tamanho (A4 virtual)",
+                    "⇅ Aplica correção de rotação (deskew) automática",
+                    "✓ Salva imagens processadas no diretório temporário",
+                    "⇅ Repete procedimento para todos os documentos recebidos",
+                    "✓ Cria índice interno de imagens geradas para o lote",
+                    "⇅ Agrupa imagens em sequência lógica de leitura",
+                    "✓ Compacta todas as imagens no formato ZIP64",
+                    "⇅ Verifica integridade do arquivo ZIP antes do envio",
+                    "✓ Anexa CPF e identificadores ao pacote de dados",
+                    "⇅ Prepara cabeçalhos HTTP com autenticação HMAC",
+                    "✓ Monta requisição multipart/form-data com arquivo ZIP",
+                    "⇅ Transmitindo pacote criptografado para o servidor Macohin — Florida, USA 🌎",
+                    "✓ Conexão segura estabelecida com a rede neural Bubba AI",
+                    "⇅ Inicia transmissão segura para webhook do n8n 🚀",
+                    "✓ Aguarda confirmação de recebimento (HTTP 202)",
+                    "⇅ Registra no log local: “Pacote enviado ao orquestrador”",
+                    "✓ Mantém canal de callback aguardando mensagens",
+                    "⇅ Calcula tempo estimado de execução com base no tamanho do lote",
+                    "✓ Tempo estimado de processamento: entre 5 e 10 minutos ⏱",
+                    "⇅ Após a conclusão, abrirá automaticamente uma janela com o Planejamento Previdenciário editável",
+                    "✓ O sistema permitirá conferência completa em plataforma editável",
+                    "⇅ Aguardando retorno do servidor Macohin AI"
                 ];
 
                 for (const msg of initialMessages) {
                     appendLogMessage(msg);
-                    await new Promise(resolve => setTimeout(resolve, 150)); // 150ms delay
+                    await new Promise(resolve => setTimeout(resolve, 3000)); // 3000ms delay
                 }
 
                 setVideoOverlayOpacity(0.2);
