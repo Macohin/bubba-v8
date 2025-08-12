@@ -62,7 +62,7 @@
     min-width: 100%; min-height: 100%;
     width: auto; height: auto;
     transform: translateX(-50%) translateY(-50%);
-    z-index: -2; opacity: 0.15; object-fit: cover;
+    z-index: -2; opacity: 0.5; object-fit: cover;
   }
 
   #rain{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.1}
@@ -190,6 +190,15 @@
   #resultsArea {
     border-top: 1px dashed rgba(255,255,255,.16);
     padding-top: 18px; margin-top: 18px;
+    max-height: 60vh;
+    overflow-y: scroll;
+    /* Hide scrollbar for IE, Edge and Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  #resultsArea::-webkit-scrollbar {
+    display: none;
   }
   #htmlResultContent {
     font-size:clamp(13px,1.6vw,15px); line-height:1.55; color:var(--txt);
