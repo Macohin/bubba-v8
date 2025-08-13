@@ -116,7 +116,14 @@
   .d1{background:#ff5f56}.d2{background:#ffbd2e}.d3{background:#27c93f}
 
   .card-body{padding:18px; font-size:clamp(13px,1.6vw,15px); line-height:1.55; color:var(--txt);
-    display:flex; flex-direction:column; flex-grow:1; min-height:0;}
+    display:flex; flex-direction:column; flex-grow:1; min-height:0; overflow-y: auto;}
+
+  /* Custom Scrollbar for the card body */
+  .card-body::-webkit-scrollbar { width: 8px; }
+  .card-body::-webkit-scrollbar-track { background: transparent; }
+  .card-body::-webkit-scrollbar-thumb { background-color: var(--accent-func); border-radius: 20px; border: 2px solid var(--bg-main); }
+  .card-body::-webkit-scrollbar-thumb:hover { background-color: var(--accent-green); }
+
   .comment{color:var(--muted); opacity:.9}
 
   /* Use Cases Section */
