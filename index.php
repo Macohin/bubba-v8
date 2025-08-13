@@ -80,7 +80,8 @@
   }
 
   .container{position:relative; z-index:2; width:100%; max-width:1120px; margin:0 auto;
-    padding: clamp(16px, 3vw, 32px); display:flex; flex-direction:column; align-items:center;}
+    padding: clamp(16px, 3vw, 32px); display:flex; flex-direction:column; align-items:center;
+    flex-grow: 1;}
 
   .hero{display:flex; flex-direction:column; align-items:center; text-align:center;
     margin-top: clamp(6px, 3vh, 16px);}
@@ -101,11 +102,12 @@
     text-shadow: 0 0 4px rgba(255,255,255,0.6), 0 0 8px var(--accent-func);
   }
 
-  .section{width:100%; display:grid; place-items:center; margin-top: clamp(18px, 4vh, 32px);}
+  .section{width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; flex-grow:1; margin-top: clamp(18px, 4vh, 32px);}
   .card{
     width:min(900px, 95%); background:linear-gradient(180deg, rgba(32, 16, 65, 0.85), rgba(37, 17, 77, 0.85));
     border:2px dotted rgba(255,255,255,.15); border-radius:18px;
     box-shadow:0 12px 60px rgba(0,0,0,.35), var(--shadow); overflow:hidden;
+    display:flex; flex-direction:column; flex-grow:1; max-height: 90%; /* prevent card from being too tall */
   }
   .chrome{display:flex; align-items:center; gap:8px; padding:10px 12px;
     border-bottom:1px dashed rgba(255,255,255,.12);
@@ -113,7 +115,8 @@
   .dot{width:10px;height:10px;border-radius:50%}
   .d1{background:#ff5f56}.d2{background:#ffbd2e}.d3{background:#27c93f}
 
-  .card-body{padding:18px; font-size:clamp(13px,1.6vw,15px); line-height:1.55; color:var(--txt)}
+  .card-body{padding:18px; font-size:clamp(13px,1.6vw,15px); line-height:1.55; color:var(--txt);
+    display:flex; flex-direction:column; flex-grow:1; min-height:0;}
   .comment{color:var(--muted); opacity:.9}
 
   /* Use Cases Section */
@@ -190,8 +193,9 @@
   #resultsArea {
     border-top: 1px dashed rgba(255,255,255,.16);
     padding-top: 18px; margin-top: 18px;
-    max-height: 60vh;
-    overflow-y: scroll;
+    overflow-y: auto;
+    flex-grow: 1;
+    min-height: 0;
     /* Hide scrollbar for IE, Edge and Firefox */
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
@@ -512,12 +516,20 @@
                     if (data.status === 'result_ready') {
                         console.log('Polling: Result is ready.');
                         stopPollingStatus();
-                        if (data.html_content) {
+
+                        if (data.link) {
+                            console.log('Redirecting to link:', data.link);
+                            appendLogMessage('✓ Análise finalizada. Redirecionando para o seu parecer...');
+                            // Redirect to the final report page
+                            window.location.href = data.link;
+                        } else if (data.html_content) {
+                            // Fallback to old method if no link is provided
+                            console.log('Displaying final result inline.');
                             const finalVideoPath = data.video ? adaptVideoPathForDevice(data.video) : adaptVideoPathForDevice('BackgroundVideos/happy_desktop.mp4');
                             displayFinalResult(data.html_content, finalVideoPath);
                         } else {
-                            console.error('Polling: Result ready, but no html_content.');
-                            appendLogMessage('Análise concluída, mas nenhum conteúdo HTML recebido.', true);
+                            console.error('Polling: Result ready, but no html_content or link.');
+                            appendLogMessage('Análise concluída, mas nenhum conteúdo ou link foi recebido.', true);
                         }
                     } else if (data.status === 'error' || data.status === 'failed' || data.status === 'error_reading_status') {
                         console.log(`Polling: Error/Failed status from server: ${data.status}.`);
