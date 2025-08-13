@@ -229,7 +229,7 @@ $editor_content = ob_get_clean();
             autosave_restore_when_empty: false,
             autosave_retention: '2m',
             content_css: 'default',
-            content_style: "body { font-family:Helvetica,Arial,sans-serif; font-size:14px; background-color: rgba(255,255,255,0.95); }",
+            content_style: "html, body { font-family:Helvetica,Arial,sans-serif; font-size:14px; background-color: rgba(255,255,255,0.85); }",
         });
     </script>
 </body>
