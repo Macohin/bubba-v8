@@ -70,6 +70,7 @@ $editor_content = ob_get_clean();
             margin: 0;
             background-color: var(--bg);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
