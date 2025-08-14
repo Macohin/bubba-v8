@@ -1,0 +1,116 @@
+/*
+ * ABNT-inspired stylesheet for TinyMCE editor content.
+ * This file styles the raw HTML content loaded from the database
+ * to provide a professional, academic look and feel inside the editor.
+ */
+
+body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000000;
+    background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent white background for the 'paper' */
+    padding: 2cm 3cm; /* ABNT margins: 3cm top/left, 2cm bottom/right */
+    margin: 0; /* Let the padding handle the spacing */
+    height: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Arial', sans-serif;
+    color: #000000;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+}
+
+h1 { font-size: 16pt; text-transform: uppercase; }
+h2 { font-size: 14pt; }
+h3 { font-size: 12pt; }
+
+p {
+    text-align: justify;
+    margin-bottom: 1em;
+    /* The abnt-body class will add the indent */
+}
+
+p.abnt-body {
+    text-indent: 1.25cm; /* Standard ABNT paragraph indent */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+    font-size: 11pt; /* Slightly smaller font for tables */
+}
+
+th, td {
+    border: 1px solid #000000;
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    background-color: #e0e0e0; /* Neutral grey for header */
+    font-weight: bold;
+    text-align: center;
+}
+
+blockquote {
+    margin-left: 4cm;
+    font-size: 10pt;
+    line-height: 1.2;
+    font-style: italic;
+    border-left: 2px solid #ccc;
+    padding-left: 1em;
+}
+
+ul, ol {
+    padding-left: 1.25cm;
+    margin-bottom: 1em;
+}
+
+li {
+    margin-bottom: 0.5em;
+}
+
+a {
+    color: #0000EE; /* Standard blue for links */
+    text-decoration: underline;
+}
+
+a:hover {
+    color: #551A8B; /* Visited link color */
+}
+
+mark {
+    background-color: #FFF3A3; /* A soft, professional yellow for highlighting */
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: #ccc;
+    margin: 2em 0;
+}
+
+/* Custom classes from AI output */
+.callout {
+    margin: 1.5em 0;
+    padding: 1em;
+    border-left: 4px solid;
+    border-radius: 4px;
+}
+
+.callout.nota {
+    background-color: #f0f7ff;
+    border-color: #6baffd;
+}
+
+.callout.alerta {
+    background-color: #fffbe6;
+    border-color: #ffc400;
+}
