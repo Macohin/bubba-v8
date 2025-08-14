@@ -35,8 +35,8 @@ $parecer = $result->fetch_assoc();
 // Use an output buffer to build the HTML string for the editor
 ob_start();
 
-// Add the main title as requested by the user
-echo '<h1><strong>PARECER PREVIDENCIÁRIO ESTRUTURADO</strong></h1><hr>';
+// Add the image header, which will be part of the exported document content.
+echo '<div style="text-align: center; margin-bottom: 20px;"><img src="https://bubba.macohin.ai/bg/cabecalho.png" alt="Cabeçalho do Parecer" style="width: 100%; max-width: 750px; border-radius: 10px;"></div><hr>';
 
 // Loop through all columns of the fetched row
 foreach ($parecer as $key => $value) {
@@ -144,13 +144,33 @@ $editor_content = ob_get_clean();
             flex-shrink: 0; background: rgba(0,0,0,0.2);
         }
         .btn {
-            background-color: #00E5FF; color: #1A0033;
-            padding: 10px 20px; border: none; border-radius: 5px;
-            cursor: pointer; font-size: 14px; font-weight: bold;
-            transition: all 0.2s; margin: 0 5px;
+            background-color: transparent;
+            border: 1px solid var(--accent-func);
+            color: var(--accent-func);
+            padding: 8px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            margin: 0 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .btn:hover { opacity: 0.8; transform: translateY(-2px); }
-        .btn-pdf { background-color: #FF00FF; }
+        .btn:hover {
+            background-color: var(--accent-func);
+            color: var(--bg-main);
+            box-shadow: 0 0 15px var(--accent-func);
+        }
+        .btn-pdf {
+            border-color: #FF00FF;
+            color: #FF00FF;
+        }
+        .btn-pdf:hover {
+            background-color: #FF00FF;
+            color: var(--bg-main);
+            box-shadow: 0 0 15px #FF00FF;
+        }
         .editor-wrapper {
             flex-grow: 1; /* Make the editor wrapper fill the available space */
             position: relative;
@@ -247,7 +267,8 @@ $editor_content = ob_get_clean();
             .catch(error => {
                 document.body.removeChild(loader);
                 console.error('Houve um problema com a sua operação de fetch:', error);
-                alert('Erro ao gerar o documento. Verifique o console para mais detalhes.');
+                // Display the actual error message from the server if available
+                alert('Erro ao gerar o documento:\n\n' + error.message);
             });
         }
 

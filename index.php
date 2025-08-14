@@ -231,7 +231,10 @@
   .log-line { margin-bottom: 0.25rem; white-space: pre-wrap; }
   .log-start { color: var(--accent-func); }       /* » : function/variable */
   .log-success { color: var(--accent-green); }    /* ✓ : green highlight */
-  .log-action { color: var(--accent-keyword); }   /* ⇅ : keyword */
+  .log-action {
+    color: #FFFFFF; /* ⇅ : White Shine */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+  }
   .log-warning { color: var(--accent-string); }   /* ! : string */
   .log-error { color: var(--accent-pink); }       /* isError: pink/red */
   .log-info { color: var(--text-secondary); }    /* ℹ : secondary text */
@@ -538,26 +541,14 @@
                     if (data.status === 'frases_received' && Array.isArray(data.frases)) {
                         fraseQueue.push(...data.frases);
                         displayFrasesWithDelay();
-                    }
-
-                    if (data.status === 'result_ready') {
-                        console.log('Polling: Result is ready.');
+                    } else if (data.status === 'result_ready' && data.link) {
+                        console.log('Polling: Result is ready. Redirecting to:', data.link);
                         stopPollingStatus();
-
-                        if (data.link) {
-                            console.log('Redirecting to link:', data.link);
-                            appendLogMessage('✓ Análise finalizada. Redirecionando para o seu parecer...');
-                            // Redirect to the final report page
+                        appendLogMessage('✓ Análise finalizada. Redirecionando para o seu parecer...');
+                        // Use a short delay to allow the user to read the final message
+                        setTimeout(() => {
                             window.location.href = data.link;
-                        } else if (data.html_content) {
-                            // Fallback to old method if no link is provided
-                            console.log('Displaying final result inline.');
-                            const finalVideoPath = data.video ? adaptVideoPathForDevice(data.video) : adaptVideoPathForDevice('BackgroundVideos/happy_desktop.mp4');
-                            displayFinalResult(data.html_content, finalVideoPath);
-                        } else {
-                            console.error('Polling: Result ready, but no html_content or link.');
-                            appendLogMessage('Análise concluída, mas nenhum conteúdo ou link foi recebido.', true);
-                        }
+                        }, 1500);
                     } else if (data.status === 'error' || data.status === 'failed' || data.status === 'error_reading_status') {
                         console.log(`Polling: Error/Failed status from server: ${data.status}.`);
                         stopPollingStatus();
@@ -645,41 +636,107 @@
                 htmlResultContent.innerHTML = '';
 
                 const initialMessages = [
-                    "» Inicia sequência de pré-processamento de documentos recebidos 🐾💾",
-                    "⇅ Lê metadados do lote enviado pelo usuário",
-                    "✓ Formatos validados: PDF, JPG, PNG, DOCX",
-                    "⇅ Cria diretório temporário para sessão",
-                    "✓ Gera identificador único para rastrear análise",
-                    "⇅ Lista arquivos recebidos e ordena por nome/tipo",
-                    "✓ Integridade confirmada (checksum SHA-256)",
-                    "⇅ Abre primeiro documento para inspeção",
-                    "⇅ Converte página 1 para JPG otimizado",
-                    "✓ Aplica filtro de nitidez para OCR preciso",
-                    "⇅ Converte demais páginas para JPG sequencialmente",
-                    "✓ Ajusta resolução e mantém proporção A4 virtual",
-                    "⇅ Remove margens e espaços em branco",
-                    "✓ Padroniza dimensões para processamento uniforme",
-                    "⇅ Aplica deskew (correção de rotação) automática",
-                    "✓ Salva imagens tratadas no diretório temporário",
-                    "⇅ Repete processo para todos os documentos recebidos",
-                    "✓ Gera índice interno das imagens processadas",
-                    "⇅ Agrupa imagens na sequência correta de leitura",
-                    "✓ Compacta em pacote ZIP64",
-                    "⇅ Valida integridade do ZIP antes do envio",
-                    "✓ Anexa CPF e metadados ao pacote",
-                    "⇅ Prepara cabeçalhos HTTP com autenticação HMAC",
-                    "✓ Monta requisição multipart/form-data",
-                    "⇅ Transmitindo pacote criptografado ao servidor Macohin — Flórida, USA 🌎",
-                    "✓ Conexão segura estabelecida com a rede neural Bubba AI",
-                    "⇅ Inicia envio para webhook do Bubba AI n8n🚀",
-                    "✓ Recebimento confirmado (HTTP 202)",
-                    "⇅ Registra no log: “Pacote enviado ao orquestrador”",
-                    "✓ Canal de callback pronto para mensagens",
-                    "⇅ Calcula tempo estimado de execução [base: tamanho do lote]",
-                    "ℹ Tempo estimado: entre 5 e 10 minutos ⏱",
-                    "⇅ Após concluir, abrirá janela do Planejamento Previdenciário editável",
-                    "✓ Plataforma permitirá conferência e ajustes em tempo real",
-                    "⇅ Aguardando retorno do servidor Bubba AI..."
+                    "» Recebendo seus documentos... 🐾 já estou afiando minhas garras de analista previdenciário!",
+                    "⇅ Olhando para o volume de arquivos... calculo que vou levar uns 7 minutinhos para processar tudo com carinho e precisão.",
+                    "ℹ Se quiser, pode ficar aqui me acompanhando... é sempre divertido ver um dog nerd em ação!",
+                    "⇅ Mas, se precisar sair, sem problema... já deixo combinado que te mando um alô no WhatsApp quando tudo estiver pronto 📱",
+                    "✓ Pronto, combinado fechado! Agora vamos ligar as turbinas e começar essa maratona previdenciária.",
+                    "⇅ Validando formatos dos arquivos recebidos para garantir compatibilidade com meu sistema.",
+                    "✓ Todos os arquivos estão nos formatos aceitos (PDF, JPG, PNG)! 📂",
+                    "⇅ Iniciando organização dos documentos por tipo e data de envio.",
+                    "⇅ Convertendo PDFs em imagens para garantir leitura mais precisa pelo OCR.",
+                    "⇅ Ajustando resolução das imagens para alcançar máxima qualidade de reconhecimento.",
+                    "✓ Conversão concluída! Todas as páginas prontas para leitura detalhada.",
+                    "⇅ Limpando bordas e corrigindo inclinações nas imagens capturadas.",
+                    "⇅ Preparando diretório temporário para esta sessão de análise.",
+                    "⇅ Criando identificador único para rastrear este processo do início ao fim.",
+                    "✓ Identificador gerado com sucesso. 🔑",
+                    "⇅ Compactando todos os arquivos para envio seguro ao servidor.",
+                    "⇅ Verificando integridade do pacote antes do disparo.",
+                    "✓ Pacote validado! Nenhum erro encontrado na compressão.",
+                    "⇅ Enviando arquivos para o servidor Macohin de Inteligência Artificial... 🚀",
+                    "⇅ Estabelecendo conexão segura com o data center na Flórida.",
+                    "✓ Conexão estabelecida com sucesso. 🔒",
+                    "⇅ Transferindo dados criptografados para processamento.",
+                    "⇅ Aguardando confirmação de recebimento do servidor remoto.",
+                    "✓ Servidor confirmou o recebimento dos arquivos! 📡",
+                    "⇅ Acionando módulo Bubba A.I. para iniciar a análise previdenciária.",
+                    "» Olá! Eu sou o Bubba, seu dog nerd previdenciário, e já estou no comando. 🐶",
+                    "⇅ Carregando bibliotecas especializadas de leitura previdenciária.",
+                    "⇅ Iniciando rotina de reconhecimento de texto (OCR) nas imagens recebidas.",
+                    "✓ OCR ativado e pronto para decifrar cada detalhe dos seus documentos.",
+                    "⇅ Extraindo texto das páginas para análise semântica.",
+                    "⇅ Aplicando filtros de correção em palavras e números detectados.",
+                    "✓ Extração de texto concluída com alta precisão! 📖",
+                    "⇅ Iniciando varredura para identificar documentos CNIS, CTPS, PPP e GPS.",
+                    "⇅ Catalogando cada documento conforme tipo e origem.",
+                    "✓ Catalogação finalizada. Tudo organizado para o próximo passo.",
+                    "⇅ Preparando ambiente de análise cruzada entre documentos.",
+                    "⇅ Carregando modelos de IA treinados para detecção de vínculos e lacunas.",
+                    "✓ Modelos carregados com sucesso. 🧠",
+                    "⇅ Enviando dados para pré-processamento e limpeza de inconsistências.",
+                    "⇅ Rodando algoritmos de detecção de datas e períodos contributivos.",
+                    "✓ Pré-processamento concluído sem falhas.",
+                    "⇅ Validando legibilidade e consistência das informações extraídas.",
+                    "⇅ Ajustando caracteres e formatação para manter integridade dos dados.",
+                    "✓ Dados preparados para análise detalhada!",
+                    "⇅ Iniciando cálculo preliminar de tempo e carência para conferência futura.",
+                    "⇅ Preparando logs técnicos para auditoria interna.",
+                    "✓ Logs técnicos ativados. Tudo sendo registrado.",
+                    "⇅ Conectando com módulos de simulação previdenciária.",
+                    "⇅ Testando comunicação com os agentes internos do Bubba A.I.",
+                    "✓ Todos os agentes internos respondendo corretamente. ✅",
+                    "⇅ Liberando pipeline de execução para as próximas etapas.",
+                    "⇅ Garantindo redundância e backups para evitar perda de dados.",
+                    "✓ Backup inicial concluído com sucesso.",
+                    "⇅ Sincronizando informações com o painel de controle do Bubba.",
+                    "⇅ Atualizando status da análise no sistema central.",
+                    "✓ Status sincronizado com o backend.",
+                    "⇅ Preparando índice de navegação para facilitar acesso aos dados.",
+                    "⇅ Ordenando documentos na sequência lógica da análise.",
+                    "✓ Ordenação finalizada e pronta para uso.",
+                    "⇅ Disparando gatilho para ativação do motor de análise principal.",
+                    "⇅ Executando diagnósticos finais antes de prosseguir.",
+                    "✓ Diagnóstico aprovado! Sistema pronto para trabalhar.",
+                    "⇅ Acionando subsistema de extração de indicadores previdenciários.",
+                    "⇅ Checando se há documentos duplicados ou ilegíveis.",
+                    "✓ Nenhuma duplicata ou falha detectada.",
+                    "⇅ Enfileirando tarefas para execução paralela.",
+                    "⇅ Configurando prioridade para documentos críticos.",
+                    "✓ Configuração de prioridade concluída.",
+                    "⇅ Estabelecendo parâmetros de análise para este cliente.",
+                    "⇅ Aplicando políticas específicas conforme tipo de benefício investigado.",
+                    "✓ Políticas aplicadas com sucesso.",
+                    "⇅ Abrindo canal de monitoramento em tempo real.",
+                    "⇅ Registrando início oficial da análise no log mestre.",
+                    "✓ Registro efetuado no log mestre.",
+                    "⇅ Carregando contexto de regras previdenciárias vigentes.",
+                    "⇅ Injetando pacotes de conhecimento especializado no motor de decisão.",
+                    "✓ Conhecimento carregado com êxito.",
+                    "⇅ Ajustando tolerância de erro para garantir alta precisão.",
+                    "⇅ Preparando cálculos preliminares de projeção.",
+                    "✓ Projeções iniciais geradas e aguardando refinamento.",
+                    "⇅ Fazendo última checagem antes da execução em larga escala.",
+                    "⇅ Validando conectividade com serviços auxiliares.",
+                    "✓ Todos os serviços auxiliares online.",
+                    "⇅ Ligando os motores principais do Bubba A.I. para iniciar a inteligência.",
+                    "⇅ Sincronizando fuso horário para padronização de datas.",
+                    "✓ Fuso horário sincronizado.",
+                    "⇅ Ativando modo narrador para acompanhamento passo a passo.",
+                    "⇅ Pronto para começar a interpretação profunda dos dados recebidos.",
+                    "✓ Ambiente completamente configurado para análise.",
+                    "⇅ Fazendo último salvamento automático antes de mergulhar na análise.",
+                    "✓ Salvamento concluído. Agora é comigo! 🐾",
+                    "⇅ Dando play no motor de raciocínio previdenciário.",
+                    "⇅ Criando checkpoints para permitir retomada em caso de falha.",
+                    "✓ Checkpoints criados com sucesso.",
+                    "⇅ Carregando sequências de análise pré-definidas.",
+                    "⇅ Confirmando que todos os módulos estão atualizados.",
+                    "✓ Versões atualizadas confirmadas.",
+                    "⇅ Disparando inicialização do Agente Narrador para registro interativo.",
+                    "⇅ Encaminhando dados iniciais para pré-leitura detalhada.",
+                    "✓ Pré-leitura iniciada. Bubba no comando!",
+                    "⇅ Respire fundo... o show previdenciário vai começar. 🐶"
                 ];
 
                 let messageIndex = 0;
