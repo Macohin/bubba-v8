@@ -25,16 +25,24 @@ if (empty($post_content) || empty($format)) {
     die('Error: Missing content or format.');
 }
 
-// 4. Prepare self-contained HTML for conversion
+// 4. Prepare base HTML and CSS
 $css_path = __DIR__ . '/css/abnt-style.css';
-$css_content = '';
-if (file_exists($css_path)) {
-    $css_content = file_get_contents($css_path);
-} else {
-    // Optional: handle missing CSS file, maybe log an error
-    // For now, it will proceed without the styles if the file is missing
+$css_content = file_exists($css_path) ? file_get_contents($css_path) : '';
+
+// 5. Conditionally simplify HTML for DOCX export
+$content_for_export = $post_content;
+if ($format === 'docx') {
+    // PHPWord's HTML parser is very limited. We need to simplify the HTML.
+    // 1. Remove the complex image header. It's a common point of failure.
+    $content_for_export = preg_replace('/<div style="text-align: center;.*?<img.*?<\/div><hr>/si', '<h1>PARECER PREVIDENCIÁRIO ESTRUTURADO</h1><hr>', $content_for_export);
+
+    // 2. Convert custom styled divs (callouts) into simpler paragraphs with text markers.
+    $content_for_export = preg_replace('/<div class="callout nota">/si', '<p><em>[Nota]:</em> ', $content_for_export);
+    $content_for_export = preg_replace('/<div class="callout alerta">/si', '<p><strong>[Alerta]:</strong> ', $content_for_export);
+    $content_for_export = str_ireplace('</div>', '</p>', $content_for_export); // Case-insensitive replace for closing div
 }
 
+// 6. Construct the final, self-contained HTML
 $full_html = <<<HTML
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -46,13 +54,12 @@ $full_html = <<<HTML
     </style>
 </head>
 <body>
-    {$post_content}
+    {$content_for_export}
 </body>
 </html>
 HTML;
 
-
-// 5. Generate file based on format
+// 7. Generate file based on format
 switch ($format) {
     case 'docx':
         try {
