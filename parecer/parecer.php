@@ -1,9 +1,9 @@
 <?php
-// --- Database Connection & Data Fetching (Copied from original) ---
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// --- Conexão com o Banco de Dados ---
 $servername = "localhost";
 $username = "bubba_parecer";
 $password = "#aD{WhbJ8y]b*!6?";
@@ -15,11 +15,13 @@ if ($conn->connect_error) {
 }
 $conn->set_charset("utf8mb4");
 
+// --- Obter e Validar CPF ---
 if (!isset($_GET['cpf'])) {
     die('CPF não informado.');
 }
 $cpf = $conn->real_escape_string($_GET['cpf']);
 
+// --- Consultar o Parecer ---
 $sql = "SELECT * FROM parecer_estruturado WHERE cpf = '$cpf'";
 $result = $conn->query($sql);
 if ($result->num_rows == 0) {
@@ -27,28 +29,124 @@ if ($result->num_rows == 0) {
 }
 $parecer = $result->fetch_assoc();
 
-// --- Content Generation Logic ---
-ob_start();
+// --- Processamento dos Dados ---
+function markdown_to_html($text) {
+    $text = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+    $text = preg_replace('/\*\*(.*?)\*\*/s', '<strong>$1</strong>', $text);
+    $text = preg_replace('/__(.*?)__/s', '<strong>$1</strong>', $text);
+    $text = preg_replace('/==(.*?)==/s', '<mark>$1</mark>', $text);
+    $text = preg_replace('/~~(.*?)~~/s', '<del>$1</del>', $text);
+    $text = preg_replace('/\*(.*?)\*/s', '<em>$1</em>', $text);
+    $text = preg_replace('/_(.*?)_/s', '<em>$1</em>', $text);
+    $text = preg_replace('/^# (.*)/m', '<h1>$1</h1>', $text);
+    $text = preg_replace('/^## (.*)/m', '<h2>$1</h2>', $text);
+    $text = preg_replace('/^### (.*)/m', '<h3>$1</h3>', $text);
+    $text = preg_replace('/^\s*-\s(.*)/m', '<ul><li>$1</li></ul>', $text);
+    $text = preg_replace('/^\s*\d\.\s(.*)/m', '<ol><li>$1</li></ol>', $text);
+    $text = nl2br($text);
+    // Limpeza para evitar <ul> aninhado incorretamente
+    $text = str_replace('</ul><ul>', '', $text);
+    $text = str_replace('</ol><ol>', '', $text);
+    return $text;
+}
 
-// Add the main title as requested
-echo '<h1><strong>Parecer Previdenciário</strong></h1><hr>';
+function parse_markdown_table($markdown) {
+    $lines = explode("\n", trim($markdown));
+    if (count($lines) < 2) return $markdown; // Não é uma tabela válida
 
-// Loop through the database result fields
+    $html = '<table style="width:100%; border-collapse: collapse;" border="1">';
+
+    // Cabeçalho
+    $header = array_map('trim', explode('|', trim($lines[0], '|')));
+    $html .= '<thead><tr>';
+    foreach ($header as $col) {
+        $html .= '<th style="padding: 8px; background-color: #f2f2f2;">' . htmlspecialchars($col) . '</th>';
+    }
+    $html .= '</tr></thead>';
+
+    // Corpo
+    $html .= '<tbody>';
+    for ($i = 2; $i < count($lines); $i++) {
+        $row = array_map('trim', explode('|', trim($lines[$i], '|')));
+        $html .= '<tr>';
+        foreach ($row as $cell) {
+            $html .= '<td style="padding: 8px;">' . markdown_to_html($cell) . '</td>';
+        }
+        $html .= '</tr>';
+    }
+    $html .= '</tbody></table><br>';
+    return $html;
+}
+
+$partes = [];
 foreach ($parecer as $key => $value) {
-    // Process only fields that are structured as 'parte_X_...' and contain JSON data
     if (strpos($key, 'parte_') === 0 && !is_null($value)) {
-        $data = json_decode($value, true);
-
-        // Check if JSON decoding was successful and the expected keys exist
-        if (json_last_error() === JSON_ERROR_NONE && isset($data['titulo']) && isset($data['conteudo'])) {
-            // Append the section title and the pre-formatted HTML content
-            echo '<h2>' . htmlspecialchars($data['titulo']) . '</h2>';
-            echo $data['conteudo']; // Echoing raw HTML as it's pre-formatted by the AI
-            echo '<hr>';
+        $decoded = json_decode($value, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            $partes[$key] = $decoded;
+        } else {
+            $titulo = ucfirst(str_replace(['parte_', '_'], ['', ' '], $key));
+            $partes[$key] = ['titulo' => $titulo, 'conteudo_bruto' => $value];
         }
     }
 }
 $conn->close();
+
+ob_start();
+foreach ($partes as $nome_parte => $dados_parte) {
+    if (isset($dados_parte['conteudo_bruto'])) {
+        echo '<h2>' . htmlspecialchars($dados_parte['titulo']) . '</h2>';
+        // Verifica se é a parte 8 para tratar como tabela markdown
+        if ($nome_parte === 'parte_8_simulacoes') {
+             echo parse_markdown_table($dados_parte['conteudo_bruto']);
+        } else {
+            echo '<pre>' . htmlspecialchars($dados_parte['conteudo_bruto']) . '</pre>';
+        }
+        echo '<hr>';
+        continue;
+    }
+
+    $secao_principal = key($dados_parte);
+    $conteudo = $dados_parte[$secao_principal];
+
+    if (isset($conteudo['titulo'])) {
+        echo '<h2>' . htmlspecialchars($conteudo['titulo']) . '</h2>';
+    }
+    if (isset($conteudo['blocos'])) {
+        foreach ($conteudo['blocos'] as $bloco) {
+            echo '<p>' . markdown_to_html($bloco) . '</p>';
+        }
+    }
+    if (isset($conteudo['paragrafos'])) {
+        foreach ($conteudo['paragrafos'] as $paragrafo) {
+            echo '<p>' . markdown_to_html($paragrafo) . '</p>';
+        }
+    }
+    if (isset($conteudo['tabela'])) {
+        echo '<table style="width:100%; border-collapse: collapse;" border="1">';
+        echo '<thead><tr>';
+        foreach ($conteudo['tabela']['cabecalho'] as $th) {
+            echo '<th style="padding: 8px; background-color: #f2f2f2;">' . htmlspecialchars($th) . '</th>';
+        }
+        echo '</tr></thead><tbody>';
+        foreach ($conteudo['tabela']['linhas'] as $tr) {
+            echo '<tr>';
+            foreach ($tr as $td) {
+                echo '<td style="padding: 8px;">' . markdown_to_html($td) . '</td>';
+            }
+            echo '</tr>';
+        }
+        echo '</tbody></table><br>';
+    }
+    if (isset($conteudo['citações'])) {
+        echo '<h4>Citações e Jurisprudências:</h4><ul>';
+        foreach ($conteudo['citações'] as $citacao) {
+            echo '<li><strong>' . htmlspecialchars($citacao['jurisprudencia']) . ':</strong> ' . markdown_to_html($citacao['texto']) . '</li>';
+        }
+        echo '</ul>';
+    }
+    echo '<hr>';
+}
 $editor_content = ob_get_clean();
 ?>
 <!DOCTYPE html>
@@ -57,218 +155,107 @@ $editor_content = ob_get_clean();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parecer Previdenciário - Bubba A.I.</title>
-    <script src="https://cdn.tiny.cloud/1/0wm27s4nqw0slo5s3z54unbiz38omlc8v450ost64vww521e/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/35.4.0/classic/ckeditor.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
     <style>
-        :root {
-            --bg: #1A0033;
-            --card-bg: linear-gradient(180deg, rgba(32, 16, 65, 0.85), rgba(37, 17, 77, 0.85));
-            --card-border: rgba(255,255,255,.15);
-            --shadow: 0 0 18px rgba(88,166,255,.28), 0 0 36px rgba(55,227,195,.18);
-        }
-        body {
-            font-family: 'Fira Code', monospace;
-            margin: 0;
-            background-color: var(--bg);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 2em;
-            box-sizing: border-box;
-        }
-        #background-video {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            transform: translateX(-50%) translateY(-50%);
-            z-index: -1;
-            opacity: 0.5;
-            object-fit: cover;
-        }
-        .hero{display:flex; flex-direction:column; align-items:center; text-align:center; margin-bottom: 2rem;}
-        .ascii{
-            white-space:pre; user-select:none; margin:0 auto; max-width:100%;
-            line-height:1.02; letter-spacing:0;
-            font-size: clamp(10px, 2vw, 18px);
-            color: transparent;
-            background-image: radial-gradient(120% 120% at 50% 20%, #c7e6ff, #ffffff 45%, #dff7ff 70%);
-            -webkit-background-clip: text; background-clip: text;
-            text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-            filter: drop-shadow(0 0 6px #a3d4ff) drop-shadow(0 0 14px #78ffe6);
-        }
-        .tagline{
-            margin-top:10px; font-size:clamp(12px,1.2vw,14px); letter-spacing:1px;
-            color: #9B84D4; /* Using a color from the theme */
-            text-shadow: 0 0 4px rgba(255,255,255,0.6), 0 0 8px #00E5FF;
-        }
-        .card {
-            width: 100%;
-            max-width: 1200px;
-            height: 90vh;
-            background: var(--card-bg);
-            border: 2px dotted var(--card-border);
-            border-radius: 18px;
-            box-shadow: 0 12px 60px rgba(0,0,0,.35), var(--shadow);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        .chrome {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
-            border-bottom: 1px dashed rgba(255,255,255,.12);
-            background: linear-gradient(0deg,#ffffff10,#0000);
-            flex-shrink: 0;
-            color: #9B84D4;
-        }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .d1 { background: #ff5f56; }
-        .d2 { background: #ffbd2e; }
-        .d3 { background: #27c93f; }
-        .actions {
-            padding: 10px;
-            text-align: center;
-            border-bottom: 1px dashed rgba(255,255,255,.12);
-            flex-shrink: 0;
-        }
-        .btn {
-            background-color: #00E5FF;
-            color: #1A0033;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.2s;
-            margin: 0 5px;
-        }
-        .btn:hover {
-            opacity: 0.8;
-            transform: translateY(-2px);
-        }
-        .btn-pdf {
-            background-color: #FF00FF;
-        }
-        .editor-wrapper {
-            flex-grow: 1;
-            padding: 1rem;
-            background: rgba(0,0,0,0.2);
-            overflow-y: auto;
-        }
+        :root { --primary-color: #2c3e50; --secondary-color: #3498db; --bg-color: #ecf0f1; --font-color: #34495e; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; background-color: var(--bg-color); color: var(--font-color); }
+        .header { background-color: var(--primary-color); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 2em; }
+        .container { max-width: 1100px; margin: 20px auto; padding: 20px; background-color: white; box-shadow: 0 0 15px rgba(0,0,0,0.1); border-radius: 8px; }
+        .actions { text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ddd; }
+        .btn { background-color: var(--secondary-color); color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.3s, transform 0.2s; margin: 5px; }
+        .btn:hover { background-color: #2980b9; transform: translateY(-2px); }
+        .btn-pdf { background-color: #e74c3c; }
+        .btn-pdf:hover { background-color: #c0392b; }
+        .loader { border: 5px solid #f3f3f3; border-radius: 50%; border-top: 5px solid var(--secondary-color); width: 40px; height: 40px; animation: spin 1s linear infinite; display: none; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Estilos para o conteúdo do editor */
+        h1, h2, h3 { color: var(--primary-color); }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 1em; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        mark { background-color: #f1c40f; padding: 2px 4px; border-radius: 3px; }
+        hr { border: 0; height: 1px; background: #ccc; margin: 2em 0; }
     </style>
 </head>
 <body>
-    <video id="background-video" autoplay loop muted playsinline src="https://bubba.macohin.ai/bg/bg.mp4"></video>
 
-    <section class="hero">
-        <pre class="ascii" aria-hidden="true">
-███╗   ███╗ █████╗  ██████╗ ██████╗ ██╗  ██╗██╗███╗   ██╗     █████╗ ██╗
-████╗ ████║██╔══██╗██╔════╝██╔═══██╗██║  ██║██║████╗  ██║    ██╔══██╗██║
-██╔████╔██║███████║██║     ██║   ██║███████║██║██╔██╗ ██║    ███████║██║
-██║╚██╔╝██║██╔══██║██║     ██║   ██║██╔══██║██║██║╚██╗██║    ██╔══██║██║
-██║ ╚═╝ ██║██║  ██║╚██████╗╚██████╔╝██║  ██║██║██║ ╚████║    ██║  ██║██║
-╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝    ╚═╝  ╚═╝╚═╝
-        </pre>
-        <div class="tagline">// Asynchronous AI Multi-Agents — Automated Legal Analysis</div>
-    </section>
+    <div class="header">
+        <h1>Parecer Previdenciário Estruturado</h1>
+    </div>
 
-    <div class="card">
-        <div class="chrome">
-            <span class="dot d1"></span>
-            <span class="dot d2"></span>
-            <span class="dot d3"></span>
-            <span style="margin-left: auto; font-size: 14px;">retirement.calc • /bubba-ai</span>
-        </div>
+    <div class="container">
         <div class="actions">
-            <button class="btn" onclick="exportDocument('docx')">📄 Exportar Word</button>
-            <button class="btn btn-pdf" onclick="exportDocument('pdf')">📑 Exportar PDF</button>
+            <button class="btn btn-word" onclick="exportWord()">Exportar para Word (.docx)</button>
+            <button class="btn btn-pdf" onclick="exportPDF()">Exportar para PDF</button>
         </div>
-        <div class="editor-wrapper">
-            <textarea id="parecer-editor"><?php echo htmlspecialchars($editor_content); ?></textarea>
-        </div>
+        <div id="loader" class="loader"></div>
+
+        <div id="editor-container"></div>
     </div>
 
     <script>
-        function exportDocument(format) {
-            const loader = document.createElement('div');
-            loader.style.position = 'fixed';
-            loader.style.top = '50%';
-            loader.style.left = '50%';
-            loader.style.transform = 'translate(-50%, -50%)';
-            loader.style.padding = '20px';
-            loader.style.background = 'rgba(0,0,0,0.8)';
-            loader.style.color = 'white';
-            loader.style.zIndex = '10000';
-            loader.textContent = 'Gerando seu documento...';
-            document.body.appendChild(loader);
+        let editor; // Variável global para o editor
 
-            const content = tinymce.get('parecer-editor').getContent();
-            const cpf = "<?php echo urlencode($cpf); ?>";
-
-            const formData = new FormData();
-            formData.append('content', content);
-            formData.append('format', format);
-            formData.append('cpf', cpf);
-
-            fetch('../export.php', {
-                method: 'POST',
-                body: formData
+        ClassicEditor
+            .create(document.querySelector('#editor-container'), {
+                language: 'pt-br'
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok.');
-                }
-                const disposition = response.headers.get('Content-Disposition');
-                let filename = 'parecer.docx'; // default
-                if (disposition && disposition.indexOf('attachment') !== -1) {
-                    const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-                    const matches = filenameRegex.exec(disposition);
-                    if (matches != null && matches[1]) {
-                        filename = matches[1].replace(/['"]/g, '');
-                    }
-                }
-                return response.blob().then(blob => ({ blob, filename }));
-            })
-            .then(({ blob, filename }) => {
-                document.body.removeChild(loader);
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                a.remove();
+            .then(newEditor => {
+                editor = newEditor;
+                editor.setData(<?php echo json_encode($editor_content); ?>);
             })
             .catch(error => {
-                document.body.removeChild(loader);
-                console.error('There has been a problem with your fetch operation:', error);
-                alert('Erro ao gerar o documento. Verifique o console para mais detalhes.');
+                console.error(error);
             });
+
+        function showLoader(show) {
+            document.getElementById('loader').style.display = show ? 'block' : 'none';
         }
 
-        tinymce.init({
-            selector: '#parecer-editor',
-            plugins: 'table advtable lists link image media code fullscreen preview wordcount',
-            menubar: 'file edit view insert format tools table help',
-            toolbar: 'undo redo | styleselect fontfamily fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | numlist bullist outdent indent | table | link image media | code fullscreen preview',
-            height: '100%',
-            autosave_ask_before_unload: true,
-            autosave_interval: '30s',
-            autosave_prefix: '{path}{query}-{id}-',
-            autosave_restore_when_empty: false,
-            autosave_retention: '2m',
-            content_css: '../css/abnt-style.css',
-        });
+        function exportWord() {
+            showLoader(true);
+            const header = "<!DOCTYPE html><html><head><meta charset='UTF-8'></head><body>";
+            const footer = "</body></html>";
+            const content = editor.getData();
+            const source = header + content + footer;
+
+            const fileBlob = htmlDocx.asBlob(source);
+
+            saveAs(fileBlob, 'parecer-previdenciario.docx');
+            showLoader(false);
+        }
+
+        function exportPDF() {
+            showLoader(true);
+            const editorContent = document.querySelector('.ck-editor__editable');
+
+            html2canvas(editorContent, {
+                scale: 2, // Aumenta a resolução da captura
+                useCORS: true
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+
+                const pdf = new jsPDF({
+                    orientation: 'p',
+                    unit: 'px',
+                    format: [canvas.width, canvas.height]
+                });
+
+                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+                pdf.save('parecer-previdenciario.pdf');
+                showLoader(false);
+            }).catch(err => {
+                console.error("Erro ao gerar PDF:", err);
+                showLoader(false);
+                alert("Ocorreu um erro ao tentar gerar o PDF. Verifique o console para mais detalhes.");
+            });
+        }
     </script>
 </body>
 </html>

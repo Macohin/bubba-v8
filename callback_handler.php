@@ -38,12 +38,26 @@ if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
     $data = $_POST;
 }
 
-// 3. Extract key data: CPF, link, and/or phrases
+// 3. Extract CPF and Phrases from the potentially complex payload
 $cpf = $data['cpf'] ?? null;
-$link = $data['link'] ?? null;
-$phrases = [];
 
-// 4. Validate CPF
+$phrases = [];
+if (isset($data['frases'])) {
+    if (is_string($data['frases'])) {
+        // This handles the case where 'frases' is a JSON string: '{"frases": [...] }'
+        $decoded_output = json_decode($data['frases'], true);
+        if (json_last_error() === JSON_ERROR_NONE && isset($decoded_output['frases']) && is_array($decoded_output['frases'])) {
+            $phrases = $decoded_output['frases'];
+            log_message("Extracted " . count($phrases) . " phrases from nested JSON string for CPF " . ($cpf ?? 'N/A'));
+        }
+    } elseif (is_array($data['frases'])) {
+        // This handles the case where 'frases' is already a JSON array
+        $phrases = $data['frases'];
+        log_message("Extracted " . count($phrases) . " phrases from direct array for CPF " . ($cpf ?? 'N/A'));
+    }
+}
+
+// 4. Validate that we have the necessary data
 if (empty($cpf)) {
     http_response_code(400);
     $error_msg = 'Error: CPF not found or invalid in callback payload.';
@@ -51,52 +65,24 @@ if (empty($cpf)) {
     echo json_encode(['success' => false, 'message' => $error_msg]);
     exit;
 }
+
 $cpf = preg_replace('/\D/', '', $cpf); // Sanitize CPF
 
-// 5. Determine workflow: Final Result (link) or Intermediate Update (frases)
-
-// --- Workflow A: Final Result Link ---
-if (!empty($link)) {
-    log_message("Processing 'link' workflow for CPF {$cpf}. Link: {$link}");
-
-    $statusToSave = [
-        'status'       => 'result_ready',
-        'link' => $link,
-        'timestamp'    => time()
-    ];
-
-// --- Workflow B: Intermediate Phrases ---
-} else {
-    log_message("Processing 'frases' workflow for CPF {$cpf}.");
-    if (isset($data['frases'])) {
-        if (is_string($data['frases'])) {
-            $decoded_output = json_decode($data['frases'], true);
-            if (json_last_error() === JSON_ERROR_NONE && isset($decoded_output['frases']) && is_array($decoded_output['frases'])) {
-                $phrases = $decoded_output['frases'];
-                log_message("Extracted " . count($phrases) . " phrases from nested JSON string.");
-            }
-        } elseif (is_array($data['frases'])) {
-            $phrases = $data['frases'];
-            log_message("Extracted " . count($phrases) . " phrases from direct array.");
-        }
-    }
-
-    if (empty($phrases)) {
-        http_response_code(400);
-        $error_msg = 'Error: Payload for CPF ' . $cpf . ' contained neither a "link" nor a valid "frases" array.';
-        log_message($error_msg . " Inspected payload: " . json_encode($data));
-        echo json_encode(['success' => false, 'message' => $error_msg]);
-        exit;
-    }
-
-    $statusToSave = [
-        'status'       => 'frases_received',
-        'frases'       => $phrases,
-        'timestamp'    => time()
-    ];
+if (empty($phrases)) {
+    http_response_code(400);
+    $error_msg = 'Error: "frases" array could not be extracted from callback payload.';
+    log_message($error_msg . " Inspected payload: " . json_encode($data));
+    echo json_encode(['success' => false, 'message' => $error_msg]);
+    exit;
 }
 
-// 6. Save the final status file for the frontend
+// 5. Prepare and save the final status file for the frontend
+$statusToSave = [
+    'status'       => 'frases_received',
+    'frases'       => $phrases,
+    'timestamp'    => time()
+];
+
 $statusFilePath = "{$statusDir}/latest_status_{$cpf}.json";
 
 if (file_put_contents($statusFilePath, json_encode($statusToSave, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX) === false) {
