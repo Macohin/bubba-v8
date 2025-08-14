@@ -64,6 +64,20 @@ $editor_content = ob_get_clean();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parecer Previdenciário - MACOHIN AI</title>
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:title" content="Parecer Previdenciário - Bubba A.I.">
+    <meta property="og:description" content="Clique para visualizar o parecer completo do caso.">
+    <meta property="og:image" content="https://bubba.macohin.ai/bg/parecer-pronto.jpg">
+    <meta property="og:url" content="https://bubba.macohin.ai/parecer/parecer.php?cpf=<?php echo urlencode($_GET['cpf']); ?>">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Parecer Previdenciário - Bubba A.I.">
+    <meta name="twitter:description" content="Clique para visualizar o parecer completo do caso.">
+    <meta name="twitter:image" content="https://bubba.macohin.ai/bg/parecer-pronto.jpg">
+
     <!-- TinyMCE a a-service script -->
     <script src="https://cdn.tiny.cloud/1/0wm27s4nqw0slo5s3z54unbiz38omlc8v450ost64vww521e/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -202,76 +216,12 @@ $editor_content = ob_get_clean();
             <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
             <span style="margin-left: auto; font-size: 14px;">parecer.final • /bubba-ai/review</span>
         </div>
-        <div class="actions">
-            <button class="btn" onclick="exportDocument('docx')">📄 Exportar para Word (.docx)</button>
-            <button class="btn btn-pdf" onclick="exportDocument('pdf')">📑 Exportar para PDF (.pdf)</button>
-        </div>
         <div class="editor-wrapper">
             <textarea id="parecer-editor"><?php echo htmlspecialchars($editor_content); ?></textarea>
         </div>
     </div>
 
     <script>
-        function exportDocument(format) {
-            // Create and show a loading indicator
-            const loader = document.createElement('div');
-            loader.style.position = 'fixed';
-            loader.style.top = '50%';
-            loader.style.left = '50%';
-            loader.style.transform = 'translate(-50%, -50%)';
-            loader.style.padding = '20px 40px';
-            loader.style.background = 'rgba(0,0,0,0.85)';
-            loader.style.color = '#00E5FF';
-            loader.style.zIndex = '10001';
-            loader.style.borderRadius = '10px';
-            loader.style.border = '1px solid #00E5FF';
-            loader.textContent = 'Gerando seu documento... por favor, aguarde.';
-            document.body.appendChild(loader);
-
-            const content = tinymce.get('parecer-editor').getContent();
-            const cpf = "<?php echo urlencode($cpf); ?>";
-
-            const formData = new FormData();
-            formData.append('content', content);
-            formData.append('format', format);
-            formData.append('cpf', cpf);
-
-            // Fetch the document from the server-side script
-            fetch('../export.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    // Get error message from response body if possible
-                    return response.text().then(text => {
-                        throw new Error('Falha na rede ou erro no servidor: ' + text);
-                    });
-                }
-                const disposition = response.headers.get('Content-Disposition');
-                let filename = 'parecer.docx'; // Default filename
-                if (disposition && disposition.indexOf('attachment') !== -1) {
-                    const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-                    const matches = filenameRegex.exec(disposition);
-                    if (matches != null && matches[1]) {
-                        filename = matches[1].replace(/['"]/g, '');
-                    }
-                }
-                return response.blob().then(blob => ({ blob, filename }));
-            })
-            .then(({ blob, filename }) => {
-                document.body.removeChild(loader);
-                // Use FileSaver.js to trigger the download
-                saveAs(blob, filename);
-            })
-            .catch(error => {
-                document.body.removeChild(loader);
-                console.error('Houve um problema com a sua operação de fetch:', error);
-                // Display the actual error message from the server if available
-                alert('Erro ao gerar o documento:\n\n' + error.message);
-            });
-        }
-
         // Initialize TinyMCE
         tinymce.init({
             selector: '#parecer-editor',
@@ -290,17 +240,14 @@ $editor_content = ob_get_clean();
             image_advtab: true,
             importcss_append: true,
 
-            // Use the new print stylesheet for an accurate preview of the PDF.
+            // Use the print stylesheet for an accurate preview of the PDF.
             content_css: '../css/print.css',
 
             // Make the UI of the editor itself dark to match the theme
             skin: 'oxide-dark',
-            // Use a separate stylesheet for editor-specific overrides, like the transparent background.
-            // We apply the transparency directly to the body inside the iframe.
+            // Apply the transparent background directly to the body inside the iframe.
             content_style: "body { background-color: rgba(255, 255, 255, 0.85) !important; }"
         });
     </script>
-    <!-- FileSaver.js is needed for the export function to work reliably -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </body>
 </html>

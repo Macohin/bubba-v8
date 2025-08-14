@@ -10,6 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" integrity="sha512-Qlv6VSKh1gDKGoJbnyA5RMXYcvnpIqhO++MhIM2fStMcGT9i2T//tSwYFlcyoRRDcDZ+TYHpH8azBBCyhpSeqw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.js"></script>
+<script src="https://unpkg.com/imask"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=VT323&display=swap" rel="stylesheet">
@@ -151,11 +152,33 @@
     border-radius: 8px; padding: 10px 12px;
     color: var(--txt); width: 100%; font-family: var(--mono);
   }
-  .card-body input[type="text"]:focus {
+  .card-body input[type="text"]:focus, .card-body input[type="tel"]:focus, .card-body select:focus {
     outline: none; border-color: var(--c1); box-shadow: 0 0 5px var(--c1);
   }
-  .card-body input[type="text"]::placeholder { color: var(--muted); opacity: 0.5; }
-  .card-body #cpfError { color: var(--accent-pink); font-size: 12px; margin-top: .5rem; }
+  .card-body input[type="text"]::placeholder, .card-body input[type="tel"]::placeholder { color: var(--muted); opacity: 0.5; }
+  .card-body .error-message { color: var(--accent-pink); font-size: 12px; margin-top: .5rem; min-height: 1.2em; }
+
+  .phone-input-group { display: flex; gap: 10px; }
+  .phone-input-group select {
+      flex: 0 0 150px; /* Do not grow, base width 150px */
+      background: var(--bg-main);
+      border: 1px solid var(--muted);
+      border-radius: 8px; padding: 10px 12px;
+      color: var(--txt); font-family: var(--mono);
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300E5FF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22/%3E%3C/svg%3E');
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: .65em auto;
+  }
+  .card-body input[type="tel"] {
+    background: var(--bg-main);
+    border: 1px solid var(--muted);
+    border-radius: 8px; padding: 10px 12px;
+    color: var(--txt); width: 100%; font-family: var(--mono);
+  }
 
   .card-body #uploadPromptText { text-align: center; font-size: 1.125rem; margin-bottom: 1rem; }
   .card-body #dropzoneContainer label {
@@ -262,10 +285,23 @@
                 <div id="cpfSection">
                     <label for="cpfInput">CPF (somente números):</label>
                     <input type="text" id="cpfInput" name="cpf" placeholder="00000000000" required>
-                    <p id="cpfError" class="hidden"></p>
+                    <p id="cpfError" class="error-message"></p>
                 </div>
 
-                <p id="uploadPromptText">Para iniciar a análise previdenciária, envie seus documentos — é essencial anexar, no mínimo, o CNIS e a CTPS.</p>
+                <div id="whatsappSection">
+                    <label for="phoneInput">WhatsApp (Obrigatório):</label>
+                    <div class="phone-input-group">
+                        <select id="countryCodeSelect" aria-label="Country code">
+                            <option value="1" data-placeholder="(xxx) xxx-xxxx" selected>🇺🇸 +1</option>
+                            <option value="55" data-placeholder="(xx) xxxxx-xxxx">🇧🇷 +55</option>
+                        </select>
+                        <input type="tel" id="phoneInput" name="whatsapp" placeholder="(xxx) xxx-xxxx" required autocomplete="tel">
+                    </div>
+                    <p id="whatsappError" class="error-message"></p>
+                    <p class="comment" style="font-size: 11px; margin-top: 4px;">Enviaremos um alô no WhatsApp quando a análise estiver pronta.</p>
+                </div>
+
+                <p id="uploadPromptText">Para iniciar a análise, envie seus documentos — é essencial anexar, no mínimo, o CNIS e a CTPS.</p>
                 <div id="dropzoneContainer">
                     <label for="dropzone-file">
                         <div id="dropzoneInstructions">
@@ -339,10 +375,71 @@
         const simulateCallbackBtn = document.getElementById('simulateCallbackBtn');
         const cpfInput = document.getElementById('cpfInput');
         const cpfError = document.getElementById('cpfError');
+        const countryCodeSelect = document.getElementById('countryCodeSelect');
+        const phoneInput = document.getElementById('phoneInput');
+        const whatsappError = document.getElementById('whatsappError');
+
+        // --- Phone Input Masking ---
+        const maskOptions = {
+            '1': { mask: '(000) 000-0000', placeholder: '(xxx) xxx-xxxx' },
+            '55': { mask: '(00) 00000-0000', placeholder: '(xx) xxxxx-xxxx' }
+        };
+        let phoneMask = IMask(phoneInput, { mask: maskOptions['1'].mask });
+
+        countryCodeSelect.addEventListener('change', (event) => {
+            const countryCode = event.target.value;
+            const newOptions = maskOptions[countryCode];
+            phoneMask.updateOptions({ mask: newOptions.mask });
+            phoneInput.placeholder = newOptions.placeholder;
+            // Trigger validation on country change
+            validateAndSanitizePhone();
+        });
+
 
         let pollingIntervalId = null;
         let lastKnownTimestamp = 0;
         let currentCpf = null; // Store CPF for polling status files
+
+        // --- Phone Validation and Sanitization ---
+        function validateAndSanitizePhone() {
+            const countryCode = countryCodeSelect.value;
+            const rawValue = phoneMask.unmaskedValue;
+            let sanitized = rawValue.replace(/\D/g, '');
+
+            let isValid = false;
+            let errorMessage = '';
+
+            if (countryCode === '1') { // USA
+                if (sanitized.length === 10) {
+                    sanitized = '1' + sanitized; // Prepend DDI
+                }
+                if (sanitized.length === 11 && sanitized.startsWith('1')) {
+                    isValid = true;
+                } else {
+                    errorMessage = 'Número inválido para os EUA. Formato esperado: +1 (xxx) xxx-xxxx.';
+                }
+            } else if (countryCode === '55') { // Brazil
+                if (sanitized.length === 11) {
+                    sanitized = '55' + sanitized; // Prepend DDI
+                }
+                if (sanitized.length === 13 && sanitized.startsWith('55')) {
+                    const ddd = sanitized.substring(2, 4);
+                    const number = sanitized.substring(4);
+                    if (number.startsWith('9') && number.length === 9) {
+                        isValid = true;
+                    } else {
+                        errorMessage = 'Número no Brasil deve ser um celular com 9 dígitos (Ex: (xx) 9xxxx-xxxx).';
+                    }
+                } else {
+                    errorMessage = 'Número inválido para o Brasil. Formato esperado: +55 (xx) xxxxx-xxxx.';
+                }
+            }
+
+            whatsappError.textContent = errorMessage;
+            return { isValid, sanitizedNumber: sanitized, errorMessage };
+        }
+
+        phoneInput.addEventListener('input', validateAndSanitizePhone);
         let isDisplayingFrases = false;
         const fraseQueue = [];
         let initialMessagesLooping = false;
@@ -587,37 +684,41 @@
 
         if(startAnalysisBtn) {
             startAnalysisBtn.addEventListener('click', function() {
-                if(!cpfInput || !cpfError) { console.error("DOM: CPF elements not found."); alert("Erro na página (CPF)."); return;}
-                if(!dropzoneFileInput) { console.error("DOM: dropzoneFileInput not found."); alert("Erro na página."); return; }
-                if(!appArea) { console.error("DOM: appArea not found."); alert("Erro na página."); return; }
-                if(!resultsArea) { console.error("DOM: resultsArea not found."); alert("Erro na página."); return; }
-                if(!htmlResultContent) { console.error("DOM: htmlResultContent not found."); alert("Erro na página."); return; }
+                // --- Run all validations ---
 
+                // 1. Validate CPF
                 const cpfValue = cpfInput.value.trim();
-                const cleanedCpf = cpfValue.replace(/[.\-\/]/g, ''); // Remove '.', '-', '/'
-                currentCpf = cleanedCpf; // Save CPF for status polling
-
-                cpfError.classList.add('hidden');
-                cpfError.textContent = '';
-
+                const cleanedCpf = cpfValue.replace(/[.\-\/]/g, '');
+                let isCpfValid = false;
                 if (cleanedCpf === '') {
                     cpfError.textContent = 'CPF é obrigatório.';
-                    cpfError.classList.remove('hidden');
-                    cpfInput.focus();
-                    return;
-                }
-
-                if (!/^\d{11}$/.test(cleanedCpf)) {
+                } else if (!/^\d{11}$/.test(cleanedCpf)) {
                     cpfError.textContent = 'CPF inválido. Deve conter 11 dígitos numéricos.';
-                    cpfError.classList.remove('hidden');
-                    cpfInput.focus();
+                } else {
+                    cpfError.textContent = '';
+                    isCpfValid = true;
+                }
+
+                // 2. Validate WhatsApp
+                const phoneValidationResult = validateAndSanitizePhone();
+
+                // 3. Validate File Upload
+                const files = dropzoneFileInput.files;
+                if (files.length === 0) {
+                    // This validation is simple, so an alert is fine for now.
+                    alert('É obrigatório enviar pelo menos um documento para análise.');
+                }
+
+                // --- Block submission if anything is invalid ---
+                if (!isCpfValid || !phoneValidationResult.isValid || files.length === 0) {
+                    console.log("Submission blocked due to validation errors.", {isCpfValid, isPhoneValid: phoneValidationResult.isValid, hasFiles: files.length > 0});
+                    // Telemetry placeholder
+                    console.log("Telemetry Event: contact_phone_validation_failed", { reason: phoneValidationResult.errorMessage || 'CPF or file missing' });
                     return;
                 }
 
-                if (dropzoneFileInput.files.length === 0) {
-                    alert('Por favor, selecione um ou mais arquivos para análise.');
-                    return;
-                }
+                // --- All good, proceed with submission ---
+                currentCpf = cleanedCpf; // Save CPF for status polling
 
                 appArea.classList.add('hidden');
                 resultsArea.classList.remove('hidden');
@@ -744,8 +845,12 @@
                 setVideoOverlayOpacity(0.2);
 
                 const formData = new FormData();
-                formData.append('cpf', cleanedCpf); // Add cleaned CPF
+                formData.append('cpf', cleanedCpf);
+                formData.append('whatsapp', phoneValidationResult.sanitizedNumber); // Add sanitized WhatsApp number
                 for (const file of dropzoneFileInput.files) { formData.append('files[]', file); }
+
+                // Telemetry placeholder
+                console.log("Telemetry Event: contact_phone_submitted", { country: countryCodeSelect.value });
 
                 fetch('upload.php', { method: 'POST', body: formData })
                 .then(response => response.json())
