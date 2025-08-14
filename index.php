@@ -185,23 +185,6 @@
             }
         }
 
-        function adaptVideoPathForDevice(videoPathFromCallback) {
-            if (!videoPathFromCallback) return '';
-            const isMobileDevice = window.matchMedia("(max-width: 768px) and (orientation: portrait)").matches ||
-                                 (window.matchMedia("(orientation: landscape)").matches && window.innerWidth < 900 && window.innerHeight < 600);
-            let adaptedPath = videoPathFromCallback;
-            if (isMobileDevice) {
-                if (!videoPathFromCallback.includes('_mobile.mp4')) {
-                    adaptedPath = videoPathFromCallback.replace('_desktop.mp4', '_mobile.mp4');
-                }
-            } else {
-                if (!videoPathFromCallback.includes('_desktop.mp4')) {
-                    adaptedPath = videoPathFromCallback.replace('_mobile.mp4', '_desktop.mp4');
-                }
-            }
-            return adaptedPath;
-        }
-
         function startPollingStatus() {
             stopPollingStatus();
             console.log("Polling: Starting (3s interval)...");
@@ -286,7 +269,7 @@
         }
 
         function initializeBackgroundVideo() {
-            let initialVideoSrc = adaptVideoPathForDevice('BackgroundVideos/desktop.mp4');
+            let initialVideoSrc = 'https://bubba.macohin.ai/bg/bg.mp4';
             changeVideoSourceUI(initialVideoSrc);
         }
 
@@ -391,7 +374,7 @@
 
         function displayFinalResult(htmlParam, videoNameParam) {
             console.log("Displaying Final Result. Video:", videoNameParam);
-            const happyVideoPath = videoNameParam || adaptVideoPathForDevice('BackgroundVideos/happy_desktop.mp4');
+            const happyVideoPath = videoNameParam || 'https://bubba.macohin.ai/bg/bg.mp4';
 
             changeVideoSourceUI(happyVideoPath);
             setVideoOverlayOpacity(0.8);
@@ -433,7 +416,7 @@
                     <hr class='my-4 border-gray-500'>
                     <p class='text-sm text-gray-400'>Este é um relatório preliminar gerado por Bubba A.I. e não substitui a consulta com um profissional especializado.</p>
                 `;
-                const happyVideo = adaptVideoPathForDevice('BackgroundVideos/happy_desktop.mp4');
+                const happyVideo = 'https://bubba.macohin.ai/bg/bg.mp4';
                 if(resultsArea && resultsArea.classList.contains('hidden')) {
                     resultsArea.classList.remove('hidden');
                 }
