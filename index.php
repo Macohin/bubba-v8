@@ -200,14 +200,26 @@
   }
   .card-body #dropzoneContainer svg { color: var(--muted); width: 2rem; height: 2rem; margin-bottom: 1rem; }
   .card-body #dropzoneContainer p { color: var(--muted); font-size: .875rem; }
-  .card-body #fileListPreviewContainer { margin-top: 1rem; }
-  .card-body #selectedFilesList { list-style-type: none; padding-left: 0; }
-  .card-body #selectedFilesList li {
-    color: var(--muted); font-size: 13px;
-    padding-left: 1.5em; position: relative;
+  .card-body #fileListPreviewContainer { margin-top: 1.25rem; }
+  .card-body #selectedFilesList {
+    list-style-type: none;
+    padding-left: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
   }
-  .card-body #selectedFilesList li::before {
-    content: '✓'; color: var(--accent-green); position: absolute; left: 0;
+  .card-body #selectedFilesList li {
+    color: var(--accent-func);
+    background-color: rgba(0, 229, 255, 0.1);
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
   }
 
   .btn{ text-decoration:none; font-weight:800; letter-spacing:.3px; padding:10px 14px;
@@ -283,8 +295,8 @@
         <div class="card-body">
             <div id="appArea" class="space-y-6">
                 <div id="cpfSection">
-                    <label for="cpfInput">CPF (somente números):</label>
-                    <input type="text" id="cpfInput" name="cpf" placeholder="00000000000" required>
+                    <label for="cpfInput">🐾 Informe abaixo o CPF do segurado</label>
+                    <input type="text" id="cpfInput" name="cpf" placeholder="Apenas números" required>
                     <p id="cpfError" class="error-message"></p>
                 </div>
 
@@ -298,10 +310,10 @@
                         <input type="tel" id="phoneInput" name="whatsapp" placeholder="(xxx) xxx-xxxx" required autocomplete="tel">
                     </div>
                     <p id="whatsappError" class="error-message"></p>
-                    <p class="comment" style="font-size: 11px; margin-top: 4px;">Enviaremos um alô no WhatsApp quando a análise estiver pronta.</p>
+                    <p class="comment" style="font-size: 12px; margin-top: 4px;">🐾 Quando eu finalizar toda a análise previdenciária, vou enviar um aviso no WhatsApp 📲 informando que está pronta para você acessar.</p>
                 </div>
 
-                <p id="uploadPromptText">Para iniciar a análise, envie seus documentos — é essencial anexar, no mínimo, o CNIS e a CTPS.</p>
+                <p id="uploadPromptText" style="font-size: 0.9em; line-height: 1.45;">Para iniciar a análise, envie os documentos do segurado 📂 — é fundamental incluir, no mínimo, o CNIS e a CTPS, sendo recomendável também anexar PPP, comprovantes de vínculos e quaisquer outros registros que possam complementar o estudo.</p>
                 <div id="dropzoneContainer">
                     <label for="dropzone-file">
                         <div id="dropzoneInstructions">
@@ -315,13 +327,13 @@
                         <input id="dropzone-file" type="file" class="hidden" multiple accept=".pdf,.jpg,.jpeg,.png" capture="environment" />
                     </label>
                 </div>
+                <button id="startAnalysisBtn" class="btn primary" style="width: 100%; font-size: 1rem; text-align: center;">
+                    Bubba, efetue a análise previdenciária
+                </button>
                 <div id="fileListPreviewContainer" class="hidden">
                     <p style="font-weight: 600; margin-bottom: .5rem;">Arquivos selecionados:</p>
                     <ul id="selectedFilesList"></ul>
                 </div>
-                <button id="startAnalysisBtn" class="btn primary" style="width: 100%; font-size: 1rem; text-align: center;">
-                    Bubba, efetue a análise previdenciária
-                </button>
             </div>
 
             <div id="resultsArea" class="hidden space-y-6">

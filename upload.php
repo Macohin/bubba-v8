@@ -202,11 +202,13 @@ if (!file_exists($zipFilePath) || filesize($zipFilePath) == 0) {
     sendJsonResponse(false, 'Server error: ZIP file creation failed or ZIP is empty.', ['details' => $errors]);
 }
 
-// 7. Send ZIP file and CPF to n8n webhook using cURL
+// 7. Send ZIP file, CPF, and WhatsApp to n8n webhook using cURL
+$whatsapp = $_POST['whatsapp'] ?? ''; // Get the sanitized whatsapp number
 $curlFile = new CURLFile($zipFilePath, 'application/zip', basename($zipFilePath));
 $postData = [
     'file' => $curlFile,
-    'cpf'  => $cpf  // Add the cleaned CPF here
+    'cpf'  => $cpf,
+    'whatsapp' => $whatsapp
 ];
 
 $ch = curl_init();
