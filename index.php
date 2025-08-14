@@ -107,7 +107,7 @@
     width:min(900px, 95%); background:linear-gradient(180deg, rgba(32, 16, 65, 0.85), rgba(37, 17, 77, 0.85));
     border:2px dotted rgba(255,255,255,.15); border-radius:18px;
     box-shadow:0 12px 60px rgba(0,0,0,.35), var(--shadow); overflow:hidden;
-    display:flex; flex-direction:column; flex-grow:1; max-height: 90%; /* prevent card from being too tall */
+    display:flex; flex-direction:column; flex-grow:1; max-height: 95%; /* prevent card from being too tall */
   }
   .chrome{display:flex; align-items:center; gap:8px; padding:10px 12px;
     border-bottom:1px dashed rgba(255,255,255,.12);
@@ -177,18 +177,7 @@
   }
   .card-body #dropzoneContainer svg { color: var(--muted); width: 2rem; height: 2rem; margin-bottom: 1rem; }
   .card-body #dropzoneContainer p { color: var(--muted); font-size: .875rem; }
-  .card-body #fileListPreviewContainer {
-    margin-top: 1rem;
-    max-height: 110px; /* Set a max height */
-    overflow-y: auto; /* Allow vertical scrolling */
-    padding-right: 10px; /* Add some padding so scrollbar doesn't overlap content */
-  }
-  /* Custom Scrollbar for the file list */
-  #fileListPreviewContainer::-webkit-scrollbar { width: 8px; }
-  #fileListPreviewContainer::-webkit-scrollbar-track { background: transparent; }
-  #fileListPreviewContainer::-webkit-scrollbar-thumb { background-color: var(--accent-func); border-radius: 20px; border: 2px solid var(--bg-main); }
-  #fileListPreviewContainer::-webkit-scrollbar-thumb:hover { background-color: var(--accent-green); }
-
+  .card-body #fileListPreviewContainer { margin-top: 1rem; }
   .card-body #selectedFilesList { list-style-type: none; padding-left: 0; }
   .card-body #selectedFilesList li {
     color: var(--muted); font-size: 13px;

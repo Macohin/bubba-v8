@@ -9,76 +9,88 @@ use Dompdf\Options;
 
 // --- Main Export Logic ---
 
-// 1. Get data from the POST request
-$content = $_POST['content'] ?? '';
+// 1. Get data from POST request
+$post_content = $_POST['content'] ?? '';
 $format = $_POST['format'] ?? '';
-$cpf = $_POST['cpf'] ?? 'documento'; // Use a default name if CPF is not provided
+$cpf = $_POST['cpf'] ?? 'documento';
 $date = date('Y-m-d');
 
-// Sanitize CPF for use in the filename to prevent any path traversal or other attacks
+// 2. Sanitize CPF for filename
 $cpf_sanitized = preg_replace('/[^0-9]/', '', $cpf);
 $filename_base = "parecer_{$cpf_sanitized}_{$date}";
 
-// 2. Validate that we have the required data
-if (empty($content) || empty($format)) {
+// 3. Validate input
+if (empty($post_content) || empty($format)) {
     http_response_code(400);
-    // Provide a clear error message for debugging
-    die('Error: Missing required "content" or "format" in POST request.');
+    die('Error: Missing content or format.');
 }
 
-// 3. Generate the file based on the requested format
+// 4. Prepare self-contained HTML for conversion
+$css_path = __DIR__ . '/css/abnt-style.css';
+$css_content = '';
+if (file_exists($css_path)) {
+    $css_content = file_get_contents($css_path);
+} else {
+    // Optional: handle missing CSS file, maybe log an error
+    // For now, it will proceed without the styles if the file is missing
+}
+
+$full_html = <<<HTML
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Parecer Previdenciário</title>
+    <style>
+        {$css_content}
+    </style>
+</head>
+<body>
+    {$post_content}
+</body>
+</html>
+HTML;
+
+
+// 5. Generate file based on format
 switch ($format) {
     case 'docx':
         try {
-            // Set headers for DOCX file download
             header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
             header("Content-Disposition: attachment; filename=\"{$filename_base}.docx\"");
 
             $phpWord = new PhpWord();
             $section = $phpWord->addSection();
-
-            // Use PHPWord's HTML helper to add the HTML content to the document
-            // The `false, false` arguments disable adding a new page and using tables as rows
-            \PhpOffice\PhpWord\Shared\Html::addHtml($section, $content, false, false);
+            \PhpOffice\PhpWord\Shared\Html::addHtml($section, $full_html, false, false);
 
             $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
-            // Save the document directly to the PHP output stream
             $objWriter->save('php://output');
-
         } catch (Exception $e) {
-            // If something goes wrong, send a server error and a descriptive message
             http_response_code(500);
-            die('Error creating DOCX file: ' . $e->getMessage());
+            error_log('Error creating DOCX file: ' . $e->getMessage());
+            die('Error creating DOCX file. Please check server logs.');
         }
         break;
 
     case 'pdf':
         try {
-            // Set headers for PDF file download
             header('Content-Type: application/pdf');
             header("Content-Disposition: attachment; filename=\"{$filename_base}.pdf\"");
 
             $options = new Options();
-            // Enable remote content (like images) and the HTML5 parser for better compatibility
             $options->set('isHtml5ParserEnabled', true);
             $options->set('isRemoteEnabled', true);
 
             $dompdf = new Dompdf($options);
-            $dompdf->loadHtml($content);
-
-            // Set paper size to A4, standard for documents
+            $dompdf->loadHtml($full_html);
             $dompdf->setPaper('A4', 'portrait');
-
-            // Render the HTML as PDF
             $dompdf->render();
 
-            // Stream the generated PDF to the browser
             echo $dompdf->output();
-
         } catch (Exception $e) {
-            // If something goes wrong, send a server error and a descriptive message
             http_response_code(500);
-            die('Error creating PDF file: ' . $e->getMessage());
+            error_log('Error creating PDF file: ' . $e->getMessage());
+            die('Error creating PDF file. Please check server logs.');
         }
         break;
 
