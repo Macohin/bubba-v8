@@ -1,0 +1,140 @@
+/*
+ * Professional Print Stylesheet for PDF Generation (ABNT Compliant)
+ * This stylesheet is designed to be used by Puppeteer for pixel-perfect PDF rendering.
+ */
+
+/* --- Font Definition --- */
+/* This requires the font files to be accessible by the server rendering the PDF.
+   Using a Google Fonts import is a reliable way to do this with Puppeteer. */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Inter:wght@400;700&display=swap');
+
+/* --- Page Layout and Margins (ABNT Standard) --- */
+@page {
+    size: A4;
+    margin: 20mm; /* Consistent 20mm margin on all sides */
+}
+
+body {
+    font-family: 'Inter', 'Roboto', sans-serif; /* Use Inter or fallback to Roboto */
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000000;
+    background-color: #FFFFFF; /* Print should have a solid white background */
+    width: 170mm; /* A4 width (210mm) - 20mm left margin - 20mm right margin = 170mm */
+    margin: 0 auto; /* Center the content column */
+}
+
+/* --- Header --- */
+.header-image {
+    width: 170mm;
+    height: 30mm;
+    object-fit: cover; /* Ensure the image covers the area without distortion */
+}
+
+/* --- Typography --- */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    color: #000000;
+    break-after: avoid-page; /* Avoid a page break right after a heading */
+}
+
+h1 { font-size: 16pt; text-transform: uppercase; margin-top: 1.5em; margin-bottom: 1em;}
+h2 { font-size: 14pt; margin-top: 1.25em; margin-bottom: 0.75em;}
+h3 { font-size: 12pt; margin-top: 1em; margin-bottom: 0.5em;}
+
+p {
+    text-align: justify;
+    margin: 0 0 1em 0;
+}
+
+p.abnt-body {
+    text-indent: 1.25cm; /* Standard ABNT paragraph indent */
+}
+
+a {
+    color: #0000EE;
+    text-decoration: underline;
+}
+
+strong, b { font-weight: bold; }
+em, i { font-style: italic; }
+
+mark {
+    background-color: #FFF3A3;
+    padding: 1px 3px;
+}
+
+hr {
+    border: 0;
+    height: 0.5pt;
+    background-color: #cccccc;
+    margin: 2em 0;
+}
+
+/* --- Tables --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+    font-size: 10pt; /* Tables often have slightly smaller text */
+    page-break-inside: avoid; /* Try to keep tables on one page */
+}
+
+thead {
+    display: table-header-group; /* CRUCIAL for repeating headers on new pages */
+}
+
+th, td {
+    border: 1px solid #000000;
+    padding: 6px;
+    text-align: left;
+    vertical-align: top;
+    page-break-inside: avoid; /* Avoid breaking a row across pages */
+}
+
+th {
+    background-color: #E0E0E0;
+    font-weight: bold;
+}
+
+/* --- Lists --- */
+ul, ol {
+    margin: 0 0 1em 0;
+    padding-left: 1.25cm;
+}
+
+li {
+    margin-bottom: 0.5em;
+    text-align: justify;
+}
+
+/* --- Blockquotes and Callouts --- */
+blockquote {
+    margin-left: 4cm;
+    font-size: 10pt;
+    line-height: 1.2;
+    font-style: italic;
+}
+
+.callout {
+    margin: 1.5em 0;
+    padding: 1em;
+    border: 1px solid #ddd;
+    border-left-width: 4px;
+    border-radius: 4px;
+    page-break-inside: avoid; /* Try to keep callouts on one page */
+}
+
+.callout.nota {
+    border-left-color: #6baffd;
+}
+
+.callout.alerta {
+    border-left-color: #ffc400;
+}
+
+
+/* --- Page Break Control for Sections --- */
+.section {
+    page-break-inside: avoid;
+}

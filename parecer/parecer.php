@@ -290,19 +290,14 @@ $editor_content = ob_get_clean();
             image_advtab: true,
             importcss_append: true,
 
-            // Link the ABNT stylesheet to style the editor content
-            content_css: '../css/abnt-style.css',
+            // Use the new print stylesheet for an accurate preview of the PDF.
+            content_css: '../css/print.css',
 
-            // Make the editor's "paper" transparent to see the background video
-            // This requires a bit of a trick with iframe styling
-            setup: function (editor) {
-                editor.on('init', function () {
-                    editor.getDoc().body.style.backgroundColor = 'transparent';
-                });
-            },
             // Make the UI of the editor itself dark to match the theme
             skin: 'oxide-dark',
-            content_style: 'body { background-color: transparent; }'
+            // Use a separate stylesheet for editor-specific overrides, like the transparent background.
+            // We apply the transparency directly to the body inside the iframe.
+            content_style: "body { background-color: rgba(255, 255, 255, 0.85) !important; }"
         });
     </script>
     <!-- FileSaver.js is needed for the export function to work reliably -->

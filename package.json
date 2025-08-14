@@ -1,0 +1,10 @@
+{
+  "name": "bubba-ai-exports",
+  "version": "1.0.0",
+  "description": "Service for generating PDF documents using Puppeteer.",
+  "main": "generate-pdf.js",
+  "private": true,
+  "dependencies": {
+    "puppeteer": "^22.10.0"
+  }
+}
