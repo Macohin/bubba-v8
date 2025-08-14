@@ -1,8 +1,7 @@
 <?php
-// Require Composer's autoloader.
+// Require Composer's autoloader using a robust, absolute path.
 // This is essential for PHPWord and Dompdf to work.
-// The user will ensure this is available on the server environment.
-require_once 'vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 use PhpOffice\PhpWord\PhpWord;
 use Dompdf\Dompdf;
