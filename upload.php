@@ -46,24 +46,24 @@ if (!mkdir($tempDir, 0775, true)) {
 $jpgFilePaths = [];
 $errors = [];
 
-// 3. Retrieve and sanitize CPF
+// 3. Retrieve, sanitize, and process CPF
 $cpf = '';
 if (isset($_POST['cpf'])) {
     $cpf = trim($_POST['cpf']);
-    // Remove non-digits (already done client-side, but good to ensure server-side)
-    $cpf = preg_replace('/\D/', '', $cpf);
+    $cpf = preg_replace('/\D/', '', $cpf); // Sanitize
+
     if (strlen($cpf) !== 11) {
-        // Optional: stricter validation if needed, for now just ensure it's 11 digits if provided
-        $errors[] = "CPF format received by server is invalid (expected 11 digits, got " . strlen($cpf) . " digits).";
-        // Decide if this is a fatal error. For now, we'll still try to proceed if files exist.
-        // If CPF is critical for n8n, then:
-        // cleanupDirectory($tempDir);
-        // sendJsonResponse(false, 'CPF inválido recebido pelo servidor.', ['details' => $errors]);
+        $errors[] = "Invalid CPF format received by server.";
     }
 } else {
-    // CPF is mandatory as per new requirement
     cleanupDirectory($tempDir);
     sendJsonResponse(false, 'CPF não fornecido.');
+}
+
+// ** New Requirement: Delete old status file before starting **
+$statusFilePath = __DIR__ . '/status_files/latest_status_' . $cpf . '.json';
+if (file_exists($statusFilePath)) {
+    unlink($statusFilePath);
 }
 
 
